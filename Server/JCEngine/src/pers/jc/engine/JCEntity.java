@@ -12,7 +12,7 @@ public class JCEntity {
 	
 	public void onDestroy() {}
 	
-	public void call(String funcName, Object[] args) {
+	public void call(String funcName, Object... args) {
 		if (isValid) {
 			String msg = new JCData(funcName, args).stringify();
 			channel.writeAndFlush(new TextWebSocketFrame(msg));
