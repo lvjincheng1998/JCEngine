@@ -26,7 +26,7 @@ public class JCEntity {
 			Object[] args = jcData.getArgs();
 			Class<?>[] argTypes = new Class[args.length];
 			for (int i = 0; i < argTypes.length; i++) {
-				argTypes[i] = args.getClass();
+				argTypes[i] = args[i].getClass();
 			}
 			this.getClass().getMethod(funcName, argTypes).invoke(this, args);
 		}

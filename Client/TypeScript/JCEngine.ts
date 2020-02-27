@@ -42,6 +42,9 @@ class WebSocketServer {
     public static webSocket:WebSocket;
 
     public static run(url:string) {
+        if(WebSocketServer.webSocket && WebSocketServer.webSocket.OPEN){
+            WebSocketServer.webSocket.close();
+        }
         WebSocketServer.webSocket = new WebSocket(url);
 
         WebSocketServer.webSocket.onopen = () => {
@@ -69,7 +72,7 @@ interface JCData {
     funcName:string;
     args:any[];
 }
-declare global{
+declare global {
     interface Window{
         JCEngine:JCEngine
     }

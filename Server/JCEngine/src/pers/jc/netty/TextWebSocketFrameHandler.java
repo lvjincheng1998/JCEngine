@@ -20,7 +20,7 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 				entity.id = JCEngine.generateId();
         		entity.channel = ctx.channel();
         		entity.isValid = true;
-        		entity.call("init", new Object[]{entity.id});
+        		entity.call("init", entity.id);
         		JCEngine.entities.put(entity.id, entity);
         		JCLogger.info("Entity:" + entity.id + " Created");
         		entity.onLoad();
