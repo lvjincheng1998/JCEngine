@@ -2,14 +2,12 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="lib/json/commons-beanutils-1.9.3.jar"/>
-	<classpathentry kind="lib" path="lib/json/commons-codec-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/netty/netty-all-4.1.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/json/commons-beanutils-1.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/json/commons-collections-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/json/commons-httpclient-3.1.jar"/>
-	<classpathentry kind="lib" path="lib/json/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="lib/json/commons-lang-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/json/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/json/ezmorph-1.0.6.jar"/>
 	<classpathentry kind="lib" path="lib/json/json-lib-2.4-jdk15.jar"/>
-	<classpathentry kind="lib" path="lib/netty/netty-all-4.1.6.Final.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
