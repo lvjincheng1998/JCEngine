@@ -24,9 +24,14 @@ export class JCEntity {
         this.onLoad();
     }
 
-    public call(funcName:string, args:any[]) {
+    public call(funcName:string, args?:any[]) {
         if(this.isValid){
-            let jcData = {funcName:funcName,args:args};
+            let jcData = {funcName: funcName, args: undefined};
+            if (args === undefined) {
+                jcData.args = [];
+            } else {
+                jcData.args = args;
+            }
             WebSocketServer.send(JSON.stringify(jcData));
         }
     }
@@ -50,7 +55,7 @@ class WebSocketServer {
         WebSocketServer.webSocket.onopen = () => {
             JCEngine.entity = new JCEngine.entityClass();
             JCEngine.entity.isValid = true;
-            JCEngine.entity.call("init",[]);
+            JCEngine.entity.call("init");
         }
 
         WebSocketServer.webSocket.onclose = () => {
