@@ -17,7 +17,7 @@ public class Player extends JCEntity {
 		System.out.println("与客户端建立连接，自动创建一个Player实体！");
 		
 		//远程调用客户端方法
-		this.call("sayHelloByServer", "吕某某", 21);
+		this.call("sayHelloByServer", "张三", 18);
 	}
 	
 	@Override
@@ -55,7 +55,7 @@ export default class Player extends JCEntity {
         console.log("与服务端建立连接，自动创建一个Player实体！");
 
         //远程调用服务端方法
-        this.call("sayHelloByClient", ["吕某某", 21]);
+        this.call("sayHelloByClient", ["李四", 20]);
     }
 
     onDestroy() {
