@@ -6,9 +6,8 @@
 
 ---
 #### 服务端使用说明
-1. 把项目工程打包成 runnable jar 。
-2. 把 jar 包引入服务端项目。
-3. 编写一个继承 JCEntity 的 Player 类。
+1. 把导出的 jar 包引入服务端项目。
+2. 编写一个继承 JCEntity 的 Player 类。
 ```
 public class Player extends JCEntity {
 	
@@ -33,7 +32,7 @@ public class Player extends JCEntity {
 	}
 }
 ```
-4. 在 Main 函数内启动 JCEngine 。
+3. 在 Main 函数内启动 JCEngine 。
 
 ```
 public static void main(String[] args) throws Exception {
