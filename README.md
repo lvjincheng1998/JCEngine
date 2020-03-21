@@ -105,7 +105,7 @@ onLoad | 该实体被创建时自动调用。
 onDestroy | 该实体被销毁时自动调用。
 
 #### 补充说明
-1. 服务端的 JCEntity 的自定义方法的参数类型只允许使用 Integer, Long, Boolean, String。
+1. 服务端的 JCEntity 的自定义方法的参数类型只允许使用 Integer, Long, Double, Boolean, String。
 2. 客户端的 JCEntity 的自定义方法的参数类型可以使用任意类型，包括 Array 和 JSONObject 。
 
 ## 其它 API 说明
