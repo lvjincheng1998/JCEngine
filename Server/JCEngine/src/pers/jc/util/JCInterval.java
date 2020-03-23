@@ -8,6 +8,7 @@ public abstract class JCInterval {
 	
 	public JCInterval (double interval) {
 		timer.schedule(new TimerTask() {
+			
 			@Override
 			public void run() {
 				try {
@@ -16,11 +17,12 @@ public abstract class JCInterval {
 					e.printStackTrace();
 				}
 			}
-		}, (long)(interval * 1000), (long)(interval * 1000));
+		}, (long) (interval * 1000), (long) (interval * 1000));
 	}
 	
 	public JCInterval (double interval, double delay) {
 		timer.schedule(new TimerTask() {
+			
 			@Override
 			public void run() {
 				try {
@@ -29,7 +31,7 @@ public abstract class JCInterval {
 					e.printStackTrace();
 				}
 			}
-		}, (long)(delay * 1000), (long)(interval * 1000));
+		}, (long) (delay * 1000), (long) (interval * 1000));
 	}
 	
 	public void cancel() {

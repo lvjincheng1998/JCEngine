@@ -8,6 +8,7 @@ public abstract class JCTimeout {
 	
 	public JCTimeout (double delay) {
 		timer.schedule(new TimerTask() {
+			
 			@Override
 			public void run() {
 				try {
@@ -17,7 +18,7 @@ public abstract class JCTimeout {
 				}
 				timer.cancel();
 			}
-		}, (long)(delay * 1000));
+		}, (long) (delay * 1000));
 	}
 	
 	public void cancel() {

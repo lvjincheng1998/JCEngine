@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import pers.jc.engine.JCChannel;
 import pers.jc.engine.JCData;
 import pers.jc.engine.JCEngine;
 import pers.jc.engine.JCEntity;
@@ -52,14 +53,16 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
     public void loadTempEntity() throws Exception {
     	tempEntity = JCEngine.entityClass.newInstance();
 		tempEntity.id = JCEngine.generateId();
-		tempEntity.channel = channel;
+		tempEntity.channel = new JCChannel(channel);
 		tempEntity.isValid = true;
 		call("loadTempEntity", tempEntity.id);
 		tempEntity.onLoad();
     }
     
     public void destroyTempEntity() {
-		tempEntity.isValid = false;
-		tempEntity.onDestroy();
+		if (tempEntity != null) {
+			tempEntity.isValid = false;
+			tempEntity.onDestroy();
+		}
     }
 }

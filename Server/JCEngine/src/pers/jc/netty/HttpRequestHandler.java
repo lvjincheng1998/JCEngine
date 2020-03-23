@@ -4,24 +4,24 @@ import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 
 public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private String websocketPath;
+    private String webSocketPath;
 
-    public HttpRequestHandler(String websocketPath){
-        this.websocketPath = websocketPath;
+    public HttpRequestHandler(String webSocketPath) {
+        this.webSocketPath = webSocketPath;
     }
    
 	@SuppressWarnings("deprecation")
 	@Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
-        if(websocketPath.equalsIgnoreCase(request.getUri())){
+        if (webSocketPath.equalsIgnoreCase(request.getUri())) {
             ctx.fireChannelRead(request.retain());
-        }else{
+        } else {
             ctx.close();
         }
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         ctx.close();
     }

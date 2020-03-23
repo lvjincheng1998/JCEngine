@@ -11,7 +11,7 @@ import pers.jc.util.JCLogger;
 
 public class WebSocketServer {
 	
-    public static void run(int port,String path) throws Exception {
+    public static void run(int port, String path) throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
