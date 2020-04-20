@@ -52,7 +52,7 @@ export default class JCTool {
         } else if (requestObject.method == RequestMethod.POST) {
             xhr.open("POST", requestObject.url, requestObject.async);
             if (requestObject.dataType == DataType.FORM) {
-                xhr.setRequestHeader("Content-Type" , "application/x-www-form-urlencoded");
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 xhr.send(getUrlForm(requestObject.data, '', '&'));
             } else if (requestObject.dataType == DataType.JSON) {
                 xhr.setRequestHeader("Content-Type", "application/json");
