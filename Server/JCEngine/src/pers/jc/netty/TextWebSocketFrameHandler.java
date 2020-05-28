@@ -8,6 +8,7 @@ import pers.jc.engine.JCChannel;
 import pers.jc.engine.JCData;
 import pers.jc.engine.JCEngine;
 import pers.jc.engine.JCEntity;
+import pers.jc.mvc.ControllerHandler;
 
 public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 	private Channel channel;
@@ -18,7 +19,7 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
     	if (channel == null) {
     		channel = ctx.channel();
     	} 
-    	invoke(JCData.parse(msg.text()));
+    	invoke(msg.text());
     }
 
     @Override
@@ -27,11 +28,12 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
     }
     
     private void call(String func, Object... args) {
-    	String text = new JCData(-1, JCData.TYPE_EVENT, func, args).stringify();
+    	String text = new JCData("", JCData.TYPE_EVENT, func, args).stringify();
 		channel.writeAndFlush(new TextWebSocketFrame(text));
     }
     
-    private void invoke(JCData data) throws Exception {
+    private void invoke(String text) throws Exception {
+    	JCData data = JCData.parse(text);
     	String func = data.getFunc();
 		Object[] args = data.getArgs();
 		Class<?>[] argTypes = new Class[args.length];
@@ -47,7 +49,15 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
     			tempEntity.getClass().getMethod(func, argTypes).invoke(tempEntity, args);
     		}
 			return;
-		}
+		} 
+    	if (data.getType() == JCData.TYPE_METHOD) {
+    		JCData resData = ControllerHandler.handle(tempEntity, data);
+    		if (resData == null) {
+    			return;
+    		} else {
+    			channel.writeAndFlush(new TextWebSocketFrame(resData.stringify()));
+    		}
+		} 
 	}
     
     public void loadTempEntity() throws Exception {

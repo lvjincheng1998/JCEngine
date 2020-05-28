@@ -12,7 +12,6 @@ public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel
     private String path;
 
     public WebSocketServerInitializer(String path) {
-        super();
         this.path = path;
     }
 

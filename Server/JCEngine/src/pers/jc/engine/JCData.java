@@ -1,31 +1,32 @@
 package pers.jc.engine;
 
-import net.sf.json.JSONObject;
+import com.alibaba.fastjson.JSON;
 
 public class JCData {
 	public static int TYPE_EVENT = 0;
 	public static int TYPE_FUNCTION = 1;
+	public static int TYPE_METHOD = 2;
 	
-	private int id;
+	private String uuid;
 	private int type;
 	private String func;
 	private Object args[];
 	
 	public JCData() {}
 	
-	public JCData(int id, int type, String func, Object[] args) {
-		this.id = id;
+	public JCData(String uuid, int type, String func, Object[] args) {
+		this.uuid = uuid;
 		this.type = type;
 		this.func = func;
 		this.args = args;
 	}
 
-	public int getId() {
-		return id;
+	public String getUuid() {
+		return uuid;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 	public int getType() {
@@ -53,10 +54,10 @@ public class JCData {
 	}
 
 	public static JCData parse(String text) {
-		return (JCData) JSONObject.toBean(JSONObject.fromObject(text), JCData.class);
+		return JSON.parseObject(text, JCData.class);
 	}
 	
 	public String stringify() {
-		return JSONObject.fromObject(this).toString();
+		return JSON.toJSONString(this);
 	}
 }

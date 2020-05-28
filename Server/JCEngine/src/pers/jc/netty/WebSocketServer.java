@@ -22,7 +22,7 @@ public class WebSocketServer {
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
             ChannelFuture future = bootstrap.bind(port).sync();
-            JCLogger.info("JCEngine WebSocket Server Listen At "
+            JCLogger.info("JCEngine Server Listen At "
             		+ InetAddress.getLocalHost().getHostAddress()
             		+ ":" + port + path);
             future.channel().closeFuture().sync();

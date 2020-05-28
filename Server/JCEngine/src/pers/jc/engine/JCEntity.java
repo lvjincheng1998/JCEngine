@@ -11,7 +11,7 @@ public class JCEntity {
 	
 	public void call(String func, Object... args) {
 		if (isValid) {
-			String text = new JCData(id, JCData.TYPE_FUNCTION, func, args).stringify();
+			String text = new JCData("", JCData.TYPE_FUNCTION, func, args).stringify();
 			channel.writeAndFlush(text);
 		}
 	}

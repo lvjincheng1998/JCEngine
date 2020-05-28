@@ -9,27 +9,35 @@ export class JCEngine {
 
 export class JCEntity {
     public id: number;
-    public channel: Channel;
+    public channel: JCChannel;
     public isValid: boolean;
 
     public onLoad() {}
 
     public onDestroy() {}
 
-    public call(func: string, args?: any[]) {
+    public call(func: string, args?: any[], callback?: Function) {
         if (this.isValid) {
-            let data = {id: this.id, type: JCDataType.FUNCTION, func: func, args: undefined};
-            if (args == undefined) {
-                data.args = [];
-            } else {
-                data.args = args;
+            let uuid = "";
+            let type = JCDataType.FUNCTION;
+            if (func.indexOf(".") > -1) {
+                uuid = JCUtil.uuid();
+                type = JCDataType.METHOD;
+                if (!callback) {
+                    callback = arguments[arguments.length - 1];
+                }
+                CallbackManager.addCallback(uuid, callback);
             }
+            if (args == undefined) {
+                args = [];
+            }
+            let data = {uuid: uuid, type: type, func: func, args: args};
             this.channel.writeAndFlush(JSON.stringify(data));
         }
     }
 }
 
-export class Channel {
+class JCChannel {
     private webSocket: WebSocket;
 
     constructor(webSocket: WebSocket) {
@@ -45,7 +53,7 @@ export class Channel {
     }
 }
 
-export class WebSocketServer {
+class WebSocketServer {
     private static webSocket: WebSocket;
     private static tempEntity: JCEntity;
 
@@ -69,12 +77,10 @@ export class WebSocketServer {
     }
 
     private static call(func: string, args?: any[]) {
-        let data:JCData = {id: -1, type: JCDataType.EVENT, func: func, args: undefined};
         if (args == undefined) {
-            data.args = [];
-        } else {
-            data.args = args;
+            args = [];
         }
+        let data:JCData = {uuid: "", type: JCDataType.EVENT, func: func, args: args};
         this.webSocket.send(JSON.stringify(data));
     }
 
@@ -89,12 +95,15 @@ export class WebSocketServer {
             }
             return;
         }
+        if (data.type == JCDataType.METHOD) {
+            CallbackManager.handleCallback(data);
+        }
     }
 
     public static loadTempEntity(id: number) {
         this.tempEntity = new JCEngine.entityClass();
         this.tempEntity.id = id;
-        this.tempEntity.channel = new Channel(this.webSocket);
+        this.tempEntity.channel = new JCChannel(this.webSocket);
         this.tempEntity.isValid = true;
         this.tempEntity.onLoad();
     }
@@ -105,14 +114,67 @@ export class WebSocketServer {
     }
 }
 
-export interface JCData {
-    id: number;
+class CallbackManager {
+    private static mapper: Map<string, CallbackInfo> = new Map();
+
+    public static addCallback(uuid: string, callback: Function) {
+        if (callback instanceof Function) {
+            this.mapper.set(uuid, {
+                method: callback, 
+                deadTime: Date.now() + 10 * 1000
+            });            
+        }
+    }
+
+    public static handleCallback(data: JCData) {
+        if (this.mapper.size > 10) {
+            let now = Date.now();
+            for (let item of this.mapper) {
+                if (now >= item[1].deadTime) {
+                    this.mapper.delete(item[0]);
+                }
+            }
+        }
+        let callbackInfo = this.mapper.get(data.uuid);
+        if (!callbackInfo) {
+            return;
+        }
+        if (callbackInfo.method instanceof Function) {
+            this.mapper.delete(data.uuid);
+            callbackInfo.method(data.args[0]);
+        }
+    }
+} 
+
+class JCUtil {
+    
+    public static uuid(): string {
+        let arr = [];
+        let hexDigits = "0123456789abcdef";
+        for (let i = 0; i < 36; i++) {
+            arr[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+        }
+        arr[14] = "4";
+        arr[19] = hexDigits.substr((arr[19] & 0x3) | 0x8, 1);
+        arr[8] = arr[13] = arr[18] = arr[23] = "";
+        return arr.join("");
+    }
+}
+
+interface CallbackInfo {
+    method: Function;
+    deadTime: number;
+}
+
+interface JCData {
+    uuid: string;
     type: number;
     func: string;
     args: any[];
 }
 
-export enum JCDataType {
+enum JCDataType {
     EVENT,
-    FUNCTION
+    FUNCTION,
+    METHOD
 }
