@@ -107,7 +107,7 @@ public class TestController {
 //扫描test包
 JCEngine.scanPackage("test");
 //服务启动
-JCEngine.boot("ws://127.0.0.1:9888/jce", Player);
+JCEngine.boot(9888, "/jce", Player.class);
 ```
 
 #### 客户端调用@Contoler注解类的方法
