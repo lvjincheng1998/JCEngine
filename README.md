@@ -44,7 +44,7 @@ public class Player extends JCEntity {
 public static void main(String[] args) throws Exception {
         //启动服务，通过 ws://127.0.0.1:9888/jce 进行访问。
         JCEngine.boot(9888, "/jce", Player.class);
-    }
+}
 ```
 
 ---
