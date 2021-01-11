@@ -21,6 +21,8 @@ export class JCEntity {
 
     public onLoad() {}
 
+    public onReload() {}
+
     public onDestroy() {}
 
     public onMiss() {}
@@ -71,7 +73,7 @@ module JCEngineCore {
     
         constructor(url: string, entity: JCEntity) {
             this.webSocket = new WebSocket(url);
-            this.tempEntity = entity == null ? new JCEngine.entityClass() : entity;
+            this.tempEntity = entity ? entity : new JCEngine.entityClass();
     
             this.webSocket.onopen = () => {
                 this.call("loadTempEntity");
@@ -115,7 +117,7 @@ module JCEngineCore {
             this.tempEntity.channel = new JCEngineCore.Channel(this.webSocket);
             this.tempEntity.isValid = true;
             try {
-                this.tempEntity.onLoad();
+                this.tempEntity.loaded ? this.tempEntity.onReload() : this.tempEntity.onLoad();
             } catch (e) {}
             this.tempEntity.loaded = true;
         }
