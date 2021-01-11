@@ -215,7 +215,7 @@ public class Dispatcher {
             contentBuilder.append("Add " + methodType);
             contentBuilder.append(" -Path: " + targetPath);
             contentBuilder.append(" -Target: " + componentClass.getName() + "." + method.getName());
-            contentBuilder.append("(" + String.join(" ,", parameterNames) + ")");
+            contentBuilder.append("(" + String.join(", ", parameterNames) + ")");
             if (httpType != null) {
                 contentBuilder.append(" -Type: " + (httpType == HttpType.GET ? "GET" : "POST"));
             }
