@@ -9,10 +9,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.codec.http.multipart.MemoryAttribute;
+import io.netty.handler.codec.http.multipart.*;
 import io.netty.util.CharsetUtil;
 import pers.jc.network.Dispatcher;
 import pers.jc.network.HttpRequest;
@@ -87,6 +84,20 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        } else if (contentType.contains(HttpHeaderValues.MULTIPART_FORM_DATA)) {
+            HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(new DefaultHttpDataFactory(false), request);
+            List<InterfaceHttpData> httpData = decoder.getBodyHttpDatas();
+            for (InterfaceHttpData data : httpData) {
+                if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
+                    MemoryAttribute attribute = (MemoryAttribute) data;
+                    paramMap.put(attribute.getName(), attribute.getValue());
+                } else if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.FileUpload) {
+                    FileUpload fileUpload = (FileUpload) data;
+                    if (fileUpload.isCompleted()) {
+                        paramMap.put(fileUpload.getName(), fileUpload);
+                    }
+                }
             }
         }
         return paramMap;

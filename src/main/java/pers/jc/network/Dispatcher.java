@@ -2,6 +2,7 @@ package pers.jc.network;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.netty.handler.codec.http.multipart.FileUpload;
 import pers.jc.engine.JCData;
 import pers.jc.engine.JCEntity;
 import pers.jc.netty.WebSocketHandler;
@@ -100,21 +101,23 @@ public class Dispatcher {
                 castArgs[i] = httpRequest;
                 continue;
             } else {
-                String arg = (String) httpRequest.getParamMap().get(httpTarget.getParameterNames()[i]);
+                Object arg = httpRequest.getParamMap().get(httpTarget.getParameterNames()[i]);
                 if (parameter.getType() == String.class) {
                     castArgs[i] = String.valueOf(arg);
                 } else if (parameter.getType() == int.class || parameter.getType() == Integer.class) {
-                    castArgs[i] = Integer.valueOf(arg);
+                    castArgs[i] = Integer.valueOf((String) arg);
                 } else if (parameter.getType() == long.class || parameter.getType() == Long.class) {
-                    castArgs[i] = Long.valueOf(arg);
+                    castArgs[i] = Long.valueOf((String) arg);
                 } else if (parameter.getType() == float.class || parameter.getType() == Float.class) {
-                    castArgs[i] = Float.valueOf(arg);
+                    castArgs[i] = Float.valueOf((String) arg);
                 } else if (parameter.getType() == double.class || parameter.getType() == Double.class) {
-                    castArgs[i] = Double.valueOf(arg);
+                    castArgs[i] = Double.valueOf((String) arg);
                 } else if (parameter.getType() == boolean.class || parameter.getType() == Boolean.class) {
-                    castArgs[i] = Boolean.valueOf(arg);
+                    castArgs[i] = Boolean.valueOf((String) arg);
                 } else if (parameter.getType() == BigDecimal.class) {
-                    castArgs[i] = new BigDecimal(arg);
+                    castArgs[i] = new BigDecimal((String) arg);
+                } else if (parameter.getType() == FileUpload.class) {
+                    castArgs[i] = arg;
                 }
             }
         }
