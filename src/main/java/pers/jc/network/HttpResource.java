@@ -23,6 +23,7 @@ public class HttpResource {
         contentTypeMap.put(".css", "text/css; charset=UTF-8");
         contentTypeMap.put(".txt", "text/plain; charset=UTF-8");
         contentTypeMap.put(".xml", "text/xml; charset=UTF-8");
+        contentTypeMap.put(".json", "application/json");
         contentTypeMap.put(".gif", "image/gif");
         contentTypeMap.put(".jpg", "image/jpeg");
         contentTypeMap.put(".png", "image/png");

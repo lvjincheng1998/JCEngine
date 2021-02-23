@@ -11,17 +11,14 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.*;
 import io.netty.util.CharsetUtil;
-import pers.jc.network.Dispatcher;
+import pers.jc.network.*;
 import pers.jc.network.HttpRequest;
-import pers.jc.network.HttpResource;
-import pers.jc.network.HttpType;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.*;
 
 public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private final String path;
-
 
     public HttpRequestHandler(String path) {
         this.path = path;
@@ -34,14 +31,23 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
 		} else if (request.method() == HttpMethod.GET && request.uri().startsWith(path))  {
             HttpRequest httpRequest = new HttpRequest(request.uri().substring(path.length()), HttpType.GET, getGetParamMap(request));
             if (HttpResource.check(httpRequest.getUri())) {
-                writeResponseForHttpResource(httpRequest.getUri(), ctx);
+                returnResource(ctx, httpRequest.getUri());
                 return;
             }
             Object handleResult = Dispatcher.handleHttpRequest(httpRequest);
             if (handleResult instanceof HttpResource) {
                 HttpResource httpResource = (HttpResource) handleResult;
                 if (HttpResource.check(httpResource.getUri())) {
-                    writeResponseForHttpResource(httpResource.getUri(), ctx);
+                    returnResource(ctx, httpResource.getUri());
+                }
+                return;
+            }
+            if (handleResult instanceof HttpRedirect) {
+                HttpRedirect httpRedirect = (HttpRedirect) handleResult;
+                if (httpRedirect.getUrl().startsWith("http")) {
+                    redirect(ctx, httpRedirect.getUrl());
+                } else {
+                    redirect(ctx, path + httpRedirect.getUrl());
                 }
                 return;
             }
@@ -59,7 +65,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 writeResponse(ctx, HttpResponseStatus.OK, handleResult);
             }
         } else if (request.uri().endsWith("/favicon.ico")) {
-            writeResponseForHttpResource("/favicon.ico", ctx);
+            returnResource(ctx, "/favicon.ico");
         } else {
             writeResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, null);
         }
@@ -133,7 +139,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
-    private void writeResponseForHttpResource(String uri, ChannelHandlerContext ctx) throws Exception {
+    private void returnResource(ChannelHandlerContext ctx, String uri) throws Exception {
         InputStream inputStream = getClass().getResourceAsStream(uri);
         FullHttpResponse response;
         if (inputStream != null) {
@@ -157,6 +163,17 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
         response.headers().set("Content-Length", response.content().readableBytes());
         response.headers().set("Access-Control-Allow-Origin", "*");
         response.headers().set("Cache-Control", "no-cache");
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+    }
+
+    private void redirect(ChannelHandlerContext ctx, String url) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT); //设置重定向响应码 （临时重定向、永久重定向）
+        HttpHeaders headers = response.headers();
+        headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "x-requested-with,content-type");
+        headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET");
+        headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+        headers.set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+        headers.set(HttpHeaderNames.LOCATION, url);
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 }

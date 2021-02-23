@@ -1,8 +1,7 @@
 package component.http;
 
 import io.netty.handler.codec.http.multipart.FileUpload;
-import pers.jc.network.HttpComponent;
-import pers.jc.network.HttpPost;
+import pers.jc.network.*;
 import pers.jc.util.JCLogger;
 import pers.jc.util.JCUtil;
 import java.io.File;
@@ -28,5 +27,10 @@ public class FileController {
             e.printStackTrace();
         }
         return "上传成功";
+    }
+
+    @HttpGet("/show")
+    public HttpResource show() {
+        return new HttpResource("/project.json");
     }
 }
