@@ -13,13 +13,15 @@ import io.netty.handler.codec.http.multipart.*;
 import io.netty.util.CharsetUtil;
 import pers.jc.network.Dispatcher;
 import pers.jc.network.HttpRequest;
+import pers.jc.network.HttpResource;
 import pers.jc.network.HttpType;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.util.*;
 
 public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private final String path;
+
 
     public HttpRequestHandler(String path) {
         this.path = path;
@@ -31,7 +33,18 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
 			ctx.fireChannelRead(request.retain());
 		} else if (request.method() == HttpMethod.GET && request.uri().startsWith(path))  {
             HttpRequest httpRequest = new HttpRequest(request.uri().substring(path.length()), HttpType.GET, getGetParamMap(request));
+            if (HttpResource.check(httpRequest.getUri())) {
+                writeResponseForHttpResource(httpRequest.getUri(), ctx);
+                return;
+            }
             Object handleResult = Dispatcher.handleHttpRequest(httpRequest);
+            if (handleResult instanceof HttpResource) {
+                HttpResource httpResource = (HttpResource) handleResult;
+                if (HttpResource.check(httpResource.getUri())) {
+                    writeResponseForHttpResource(httpResource.getUri(), ctx);
+                }
+                return;
+            }
             if (handleResult == HttpRequest.URI_NOT_MATCH || handleResult == HttpRequest.TYPE_NOT_MATCH) {
                 writeResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, null);
             } else {
@@ -45,6 +58,8 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
             } else {
                 writeResponse(ctx, HttpResponseStatus.OK, handleResult);
             }
+        } else if (request.uri().endsWith("/favicon.ico")) {
+            writeResponseForHttpResource("/favicon.ico", ctx);
         } else {
             writeResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, null);
         }
@@ -112,6 +127,33 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
         } else {
             response.headers().set("Content-Type", "application/json; charset=utf-8");
         }
+        response.headers().set("Content-Length", response.content().readableBytes());
+        response.headers().set("Access-Control-Allow-Origin", "*");
+        response.headers().set("Cache-Control", "no-cache");
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+    }
+
+    private void writeResponseForHttpResource(String uri, ChannelHandlerContext ctx) throws Exception {
+        InputStream inputStream = getClass().getResourceAsStream(uri);
+        FullHttpResponse response;
+        if (inputStream != null) {
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            byte[] bytes = new byte[bufferedInputStream.available()];
+            bufferedInputStream.read(bytes);
+            bufferedInputStream.close();
+            ByteBuf bufContent;
+            if (HttpResource.isByteType(uri)) {
+                bufContent = copiedBuffer(bytes);
+            } else {
+                String strContent = new String(bytes);
+                bufContent = copiedBuffer(strContent, CharsetUtil.UTF_8);
+            }
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, bufContent);
+        } else {
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
+        }
+        String contentType = HttpResource.getContentType(uri);
+        response.headers().set("Content-Type", contentType);
         response.headers().set("Content-Length", response.content().readableBytes());
         response.headers().set("Access-Control-Allow-Origin", "*");
         response.headers().set("Cache-Control", "no-cache");
