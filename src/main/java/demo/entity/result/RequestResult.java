@@ -1,4 +1,4 @@
-package entity.result;
+package demo.entity.result;
 
 public class RequestResult {
     private int code;

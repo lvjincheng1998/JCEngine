@@ -1,8 +1,8 @@
-package component.socket;
+package demo.component.socket;
 
 import com.alibaba.fastjson.JSONObject;
-import entity.Player;
-import entity.result.RequestResult;
+import demo.entity.Player;
+import demo.entity.result.RequestResult;
 import pers.jc.network.SocketComponent;
 import pers.jc.network.SocketMethod;
 import pers.jc.util.JCLogger;

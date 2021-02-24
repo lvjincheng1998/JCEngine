@@ -1,5 +1,7 @@
-import entity.Player;
-import entity.table.Prop;
+package demo;
+
+import demo.entity.Player;
+import demo.entity.table.Prop;
 import pers.jc.sql.CURD;
 import pers.jc.sql.SQL;
 import java.util.HashMap;

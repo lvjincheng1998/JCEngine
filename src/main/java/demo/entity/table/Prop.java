@@ -1,4 +1,4 @@
-package entity.table;
+package demo.entity.table;
 
 import pers.jc.sql.AutoIncrement;
 import pers.jc.sql.Column;

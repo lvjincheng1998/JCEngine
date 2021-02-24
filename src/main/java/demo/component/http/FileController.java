@@ -1,4 +1,4 @@
-package component.http;
+package demo.component.http;
 
 import io.netty.handler.codec.http.multipart.FileUpload;
 import pers.jc.network.*;
@@ -15,7 +15,9 @@ public class FileController {
             String catalog = new File("").getCanonicalPath() + File.separator + "upload";
             File catalogFile = new File(catalog);
             if (!catalogFile.exists()) {
-                catalogFile.mkdir();
+                if (!catalogFile.mkdir()) {
+                    throw new Exception("创建目录失败 " + catalog);
+                }
             }
             String oldFileName = fileUpload.getFilename();
             String newFileName = JCUtil.uuid() + oldFileName.substring(oldFileName.lastIndexOf("."));
