@@ -1,4 +1,4 @@
-package demo.entity;
+package entity;
 
 import io.netty.util.internal.ConcurrentSet;
 import pers.jc.engine.JCEntity;

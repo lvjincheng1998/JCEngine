@@ -1,6 +1,4 @@
-package demo;
-
-import demo.entity.Player;
+import entity.Player;
 import pers.jc.engine.JCEngine;
 
 /**
@@ -12,7 +10,7 @@ public class Boot {
         //数据库初始化
         DataBase.init();
         //扫描并注册指定包的组件
-        JCEngine.scanPackage("demo/component");
+        JCEngine.scanPackage("component");
         //启动游戏引擎
         JCEngine.boot(9831, "/JCEngineDemo", Player.class);
     }

@@ -1,4 +1,4 @@
-package demo.component.http;
+package component.http;
 
 import io.netty.handler.codec.http.multipart.FileUpload;
 import pers.jc.network.*;

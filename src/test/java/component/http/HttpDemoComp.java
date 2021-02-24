@@ -1,6 +1,6 @@
-package demo.component.http;
+package component.http;
 
-import demo.entity.result.RequestResult;
+import entity.result.RequestResult;
 import pers.jc.network.HttpComponent;
 import pers.jc.network.HttpGet;
 import pers.jc.network.HttpPost;
