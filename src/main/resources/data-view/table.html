@@ -14,13 +14,12 @@
     let tableKey = location.search.substring("?tableKey=".length);
     let path = location.pathname.substring(0, location.pathname.indexOf("/data-view"));
     $.get(path + "/dataView/getTableCols?tableKey=" + tableKey, (tableCols) => {
-        console.log(tableCols)
         layui.use("table", () => {
             layui.table.render({
                 elem: "#render-table"
                 ,url: path + "/dataView/showTable?tableKey=" + tableKey
                 ,cellMinWidth: 80
-                ,cols: tableCols
+                ,cols: [tableCols]
                 ,page: true
                 ,limit: 10
             });

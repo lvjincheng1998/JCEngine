@@ -51,17 +51,25 @@ public class DataView {
             jsonObject.put("title", fieldInfo.columnLabel);
             jsonObject.put("isKey", fieldInfo.isIdColumn);
             jsonObject.put("autoIncrement", fieldInfo.autoIncrement);
+            jsonObject.put("align", "center");
+            jsonObject.put("sort", true);
             tableCols.add(jsonObject);
         }
         return tableCols;
     }
 
     @HttpGet("/showTable")
-    public ArrayList<Object> showTable(String tableKey, int page, int limit) {
-//        Class<?> tableClass = tableMap.get(tableKey);
-//        ArrayList<T> curd.select(tableClass, new SQL(){{
-//            LIMIT((page - 1) * limit, limit);
-//        }});
-        return null;
+    public JSONObject showTable(String tableKey, int page, int limit) {
+        Class<?> tableClass = tableMap.get(tableKey);
+        int count = curd.getRowCount(tableClass);
+        ArrayList<?> data = curd.select(tableClass, new SQL(){{
+            LIMIT((page - 1) * limit, limit);
+        }});
+        JSONObject response = new JSONObject();
+        response.put("code", 0);
+        response.put("msg", "success");
+        response.put("count", count);
+        response.put("data", data);
+        return response;
     }
 }

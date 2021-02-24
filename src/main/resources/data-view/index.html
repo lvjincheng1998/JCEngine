@@ -11,7 +11,7 @@
     <div class="layui-logo" style="font-weight: bold;">数据视图</div>
     <!-- 头部区域（可配合layui已有的水平导航） -->
     <ul class="layui-nav layui-layout-left">
-      <li class="layui-nav-item"><a onclick="refresh('recharge/recharge.php')">模块管理</a></li>
+      <li class="layui-nav-item"><a href="">模块管理</a></li>
     </ul>
     <ul class="layui-nav layui-layout-right">
       <li class="layui-nav-item"><a href="">退出</a></li>
@@ -24,7 +24,7 @@
         <li class="layui-nav-item layui-nav-itemed">
           <a class="" href="javascript:;">表格列表</a>
           <dl class="layui-nav-child" id="table-list">
-
+            <!-- 自动获取的数据 -->
           </dl>
         </li>
       </ul>
@@ -41,6 +41,11 @@
   </div>
 </div>
 </body>
+<style>
+  a {
+    cursor:pointer
+  }
+</style>
 <script src="layui/layui.js"></script>
 <script src="js/jquery.min.js"></script>
 <script>
