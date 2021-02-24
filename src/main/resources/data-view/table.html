@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>表格</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="layui/css/layui.css">
+</head>
+<body>
+    <table class="layui-hide" id="render-table"></table>
+</body>
+<script src="layui/layui.js" charset="utf-8"></script>
+<script src="js/jquery.min.js"></script>
+<script>
+    let tableKey = location.search.substring("?tableKey=".length);
+    let path = location.pathname.substring(0, location.pathname.indexOf("/data-view"));
+    $.get(path + "/dataView/getTableCols?tableKey=" + tableKey, (tableCols) => {
+        console.log(tableCols)
+        layui.use("table", () => {
+            layui.table.render({
+                elem: "#render-table"
+                ,url: path + "/dataView/showTable?tableKey=" + tableKey
+                ,cellMinWidth: 80
+                ,cols: tableCols
+                ,page: true
+                ,limit: 10
+            });
+        });
+    });
+</script>
+</html>
