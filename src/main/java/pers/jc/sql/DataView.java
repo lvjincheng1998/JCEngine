@@ -11,6 +11,7 @@ import java.util.*;
 public class DataView {
     private static HashMap<String, Class<?>> tableMap = new HashMap<>();
     private static CURD curd;
+    public static boolean enabled;
 
     public static void scanPackage(String targetPackage) {
         Reflections reflections = new Reflections(targetPackage);
@@ -23,6 +24,7 @@ public class DataView {
     public static void enable(CURD curd) {
         DataView.curd = curd;
         JCEngine.addComponent(DataView.class);
+        enabled = true;
     }
 
     @HttpGet("/getTableList")

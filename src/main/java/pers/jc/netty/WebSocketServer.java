@@ -7,6 +7,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import pers.jc.sql.DataView;
 import pers.jc.util.JCLogger;
 
 public class WebSocketServer {
@@ -25,6 +26,11 @@ public class WebSocketServer {
             JCLogger.info("JCEngine Server Listen At "
             		+ InetAddress.getLocalHost().getHostAddress()
             		+ ":" + port + path);
+            if (DataView.enabled) {
+                JCLogger.info("Data View Listen At "
+                    + InetAddress.getLocalHost().getHostAddress()
+                    + ":" + port + path + "/data-view/index.html");
+            }
             future.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
