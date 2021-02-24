@@ -125,7 +125,12 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
     }
 
     private void writeResponse(ChannelHandlerContext ctx, HttpResponseStatus status, Object content) {
-        String strContent = content == null ? "" : JSON.toJSONString(content, SerializerFeature.DisableCircularReferenceDetect);
+        String strContent = "";
+        if (content instanceof String) {
+            strContent = String.valueOf(content);
+        } else if (content != null) {
+            strContent = JSON.toJSONString(content, SerializerFeature.DisableCircularReferenceDetect);
+        }
         ByteBuf bufContent = copiedBuffer(strContent, CharsetUtil.UTF_8);
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, bufContent);
         if (content == null || content instanceof String) {
@@ -145,16 +150,20 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
         if (inputStream != null) {
             BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
             byte[] bytes = new byte[bufferedInputStream.available()];
-            bufferedInputStream.read(bytes);
+            int len = bufferedInputStream.read(bytes);
             bufferedInputStream.close();
-            ByteBuf bufContent;
-            if (HttpResource.isByteType(uri)) {
-                bufContent = copiedBuffer(bytes);
+            if (len != -1) {
+                ByteBuf bufContent;
+                if (HttpResource.isByteType(uri)) {
+                    bufContent = copiedBuffer(bytes);
+                } else {
+                    String strContent = new String(bytes);
+                    bufContent = copiedBuffer(strContent, CharsetUtil.UTF_8);
+                }
+                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, bufContent);
             } else {
-                String strContent = new String(bytes);
-                bufContent = copiedBuffer(strContent, CharsetUtil.UTF_8);
+                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
             }
-            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, bufContent);
         } else {
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
         }
