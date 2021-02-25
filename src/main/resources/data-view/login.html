@@ -145,19 +145,29 @@
   resizeFrame();
   window.addEventListener("resize", resizeFrame);
 </script>
+<script src="layui/layui.js" charset="utf-8"></script>
 <script src="js/jquery.min.js"></script>
 <script>
-  function login() {
-    let user = $("#user").val();
-    let pwd = $("#pwd").val();
-    window.localStorage.setItem("JCEngine-DataView-LoginInfo", "user=" + user + "&pwd=" + pwd);
-    window.location.href = "index.html";
-  }
-  $("#submit").on("click", login.bind(this));
-  window.addEventListener("keydown", (e) => {
-    if (e.key == "Enter") {
-      login();
+  layui.use("layer", () => {
+    function login() {
+      let user = $("#user").val();
+      let pwd = $("#pwd").val();
+      let path = location.pathname.substring(0, location.pathname.indexOf("/data-view"));
+      $.post(path + "/dataView/login", {user: user, pwd: pwd}, (resCode) => {
+        if (resCode == 0) {
+          layer.msg("账号密码错误");
+          return;
+        }
+        window.localStorage.setItem("JCEngine-DataView-LoginInfo", "user=" + user + "&pwd=" + pwd);
+        window.location.href = "index.html";
+      });
     }
+    $("#submit").on("click", login.bind(this));
+    window.addEventListener("keydown", (e) => {
+      if (e.key == "Enter") {
+        login();
+      }
+    });
   });
 </script>
 </html>        

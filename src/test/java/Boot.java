@@ -13,6 +13,7 @@ public class Boot {
         //启动数据视图（类似后台管理）
         DataView.scanPackage("entity");
         DataView.setCURD(DataBase.curd);
+        DataView.setLoginVerify("admin", "123456");
         DataView.enable();
         //扫描并注册指定包的组件
         JCEngine.scanPackage("component");

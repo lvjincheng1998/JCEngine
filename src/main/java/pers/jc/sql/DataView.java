@@ -6,6 +6,7 @@ import org.reflections.Reflections;
 import pers.jc.engine.JCEngine;
 import pers.jc.network.HttpComponent;
 import pers.jc.network.HttpGet;
+import pers.jc.network.HttpPost;
 import pers.jc.util.JCLogger;
 import java.util.*;
 
@@ -31,6 +32,10 @@ public class DataView {
     }
 
     public static void setLoginVerify(String username, String password) {
+        if (username == null || password == null) {
+            JCLogger.error("username or password can not be null");
+            return;
+        }
         DataView.username = username;
         DataView.password = password;
         loginVerify = true;
@@ -152,6 +157,17 @@ public class DataView {
                 VALUES(key, PARAM(value));
             }
         }});
+    }
+
+    @HttpPost("/login")
+    public int login(String user, String pwd) {
+        if (!loginVerify) {
+            return 1;
+        }
+        if (username.equals(user) && pwd.equals(pwd)) {
+            return 1;
+        }
+        return 0;
     }
 
     private JSONObject responseTableInfo(int code, Object data, int count, String msg) {

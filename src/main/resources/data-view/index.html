@@ -10,10 +10,12 @@
   <div class="layui-header">
     <div class="layui-logo" style="font-weight: bold;">数据视图</div>
     <!-- 头部区域（可配合layui已有的水平导航） -->
-<!--    <ul class="layui-nav layui-layout-left">-->
-<!--      <li class="layui-nav-item"><a href="">模块管理</a></li>-->
-<!--    </ul>-->
     <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item">
+        <a href="javascript:;">
+          <img src="../favicon.ico" class="layui-nav-img">
+        </a>
+      </li>
       <li class="layui-nav-item"><a onclick="quit()">退出</a></li>
     </ul>
   </div>
@@ -68,6 +70,7 @@
       window.localStorage.removeItem("JCEngine-DataView-LoginInfo");
       window.location.href = "login.html";
     }
+    window.addEventListener("beforeunload", quit.bind(this));
     !function check() {
       let loginInfo = window.localStorage.getItem("JCEngine-DataView-LoginInfo");
       if (!loginInfo) {
