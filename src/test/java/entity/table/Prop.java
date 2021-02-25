@@ -5,16 +5,16 @@ import pers.jc.sql.Column;
 import pers.jc.sql.Id;
 import pers.jc.sql.Table;
 
-@Table("prop")
+@Table(value = "prop", title = "玩家道具数据")
 public class Prop {
-    @Id
+    @Id(title = "自增ID")
     @AutoIncrement
     private int auto_id;
-    @Column
+    @Column(title = "玩家ID")
     private int player_id;
-    @Column
+    @Column(title = "道具ID")
     private int prop_id;
-    @Column
+    @Column(title = "道具数量")
     private int prop_count;
 
     public int getAuto_id() {

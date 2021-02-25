@@ -1,16 +1,18 @@
 package entity.table;
 
+import pers.jc.sql.AutoIncrement;
 import pers.jc.sql.Column;
 import pers.jc.sql.Id;
 import pers.jc.sql.Table;
 
-@Table("weapon")
+@Table(value = "weapon", title = "玩家武器数据")
 public class Weapon {
-    @Id
+    @Id(title = "自增ID")
+    @AutoIncrement
     private int id;
-    @Column
+    @Column(title = "玩家ID")
     private int player_id;
-    @Column
+    @Column(title = "武器ID")
     private int weapon_id;
 
     public int getId() {

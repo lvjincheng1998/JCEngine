@@ -15,7 +15,7 @@ public class DataView {
     private static CURD curd;
     private static String username;
     private static String password;
-    private static boolean loginVerify;
+    public static boolean loginVerify;
     public static boolean enabled;
 
     public static void scanPackage(String targetPackage) {
