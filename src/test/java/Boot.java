@@ -12,7 +12,8 @@ public class Boot {
         DataBase.init();
         //启动数据视图（类似后台管理）
         DataView.scanPackage("entity");
-        DataView.enable(DataBase.curd);
+        DataView.setCURD(DataBase.curd);
+        DataView.enable();
         //扫描并注册指定包的组件
         JCEngine.scanPackage("component");
         //启动游戏引擎

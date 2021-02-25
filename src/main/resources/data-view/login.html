@@ -44,7 +44,7 @@
       <div id="title">数据视图</div>
       <input id="user" type="text" name="user" placeholder="账号" class="layui-input">
       <input id="pwd" type="password" name="pwd"placeholder="密码" class="layui-input">
-      <button id="submit" type="submit" class="layui-btn">登录</button>
+      <button id="submit" class="layui-btn">登录</button>
     </div>
   </div>
 </body>
@@ -147,11 +147,19 @@
 </script>
 <script src="js/jquery.min.js"></script>
 <script>
-  document.getElementById("submit").onclick = function() {
-    $.get("login.php", {user: $("#user").val(), pwd: $("#pwd").val()}, (res) => {
-        eval(res.data_code);
-    });
+  function login() {
+    let user = $("#user").value();
+    let pwd = $("#pwd").value();
+    console.log(user, pwd);
+  }
+  $("#submit").onclick = () => {
+    login();
   };
+  window.addEventListener("keydown", (e) => {
+    if (e.key == "Enter") {
+      login();
+    }
+  });
 </script>
 </html>        
         

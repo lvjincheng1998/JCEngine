@@ -6,23 +6,92 @@
   <link rel="stylesheet" href="layui/css/layui.css">
 </head>
 <body>
-    <table class="layui-hide" id="render-table"></table>
+    <table class="layui-hide" id="render-table" lay-filter="render-table"></table>
 </body>
 <script src="layui/layui.js" charset="utf-8"></script>
 <script src="js/jquery.min.js"></script>
+<script type="text/html" id="top-bar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">添加数据</button>
+        <button class="layui-btn layui-btn-sm" lay-event="del">批量删除</button>
+    </div>
+</script>
+<script type="text/html" id="row-bar">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
 <script>
     let tableKey = location.search.substring("?tableKey=".length);
     let path = location.pathname.substring(0, location.pathname.indexOf("/data-view"));
     $.get(path + "/dataView/getTableCols?tableKey=" + tableKey, (tableCols) => {
+        let idColumns = [];
+        for (let col of tableCols) {
+            if (col.isKey) {
+                idColumns.push(col.field);
+            }
+        }
+        tableCols = [{fixed: "left", type: "checkbox"}].concat(tableCols);
+        tableCols.push({fixed: "right", title: "操作", toolbar: "#row-bar", align: "center", width: 120});
         layui.use("table", () => {
-            layui.table.render({
+            let table = layui.table;
+            table.render({
                 elem: "#render-table"
                 ,url: path + "/dataView/showTable?tableKey=" + tableKey
                 ,cellMinWidth: 80
                 ,cols: [tableCols]
                 ,page: true
                 ,limit: 10
+                ,toolbar: "#top-bar"
+                ,id: "render-table"
             });
+            table.on("toolbar(render-table)", function(obj) {
+                let checkStatus = table.checkStatus(obj.config.id);
+                switch(obj.event){
+                    case "add":
+                        console.log("add");
+                        break;
+                    case "del":
+                        deleteRows(checkStatus.data);
+                        break;
+                };
+            });
+            table.on("tool(render-table)", (obj) => {
+                if(obj.event == "del"){
+                    deleteRows([obj.data]);
+                }
+            });
+            function deleteRows(rowDataList) {
+                if (rowDataList.length == 0) {
+                    return;
+                }
+                layer.confirm(rowDataList.length == 1 ? "确定删除该行数据？" : `确定删除选中的${rowDataList.length}行数据？`, (index) => {
+                    layer.close(index);
+                    let rowKVsList = [];
+                    for (let rowData of rowDataList) {
+                        let rowKVs = [];
+                        for (let key of idColumns) {
+                            rowKVs.push(key);
+                            rowKVs.push(rowData[key]);
+                        }
+                        rowKVsList.push(rowKVs);
+                    }
+                    $.get(
+                        path + "/dataView/deleteRows",
+                        {tableKey: tableKey, rowKVsList: JSON.stringify(rowKVsList)},
+                        (res) => {
+                            layer.open({
+                                type: 1
+                                ,content: "<div style='padding: 20px 100px;'>删除成功</div>"
+                                ,btn: "确定"
+                                ,btnAlign: 'c'
+                                ,yes: () => {
+                                    layer.closeAll();
+                                    table.reload("render-table");
+                                }
+                            });
+                        }
+                    );
+                });
+            }
         });
     });
 </script>
