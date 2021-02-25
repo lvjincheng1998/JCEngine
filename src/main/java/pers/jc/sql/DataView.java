@@ -100,14 +100,6 @@ public class DataView {
         int delCount = 0;
         for (Object kvsObj : arr) {
             JSONArray kvs = (JSONArray) kvsObj;
-            System.out.println(new SQL(){{
-                DELETE_FROM(tableClass);
-                for (int i = 0; i < kvs.size(); i += 2) {
-                    String key = kvs.getString(i);
-                    String value = kvs.getString(i + 1);
-                    WHERE(key + " = " + PARAM(value));
-                }
-            }});
             delCount += curd.delete(new SQL(){{
                 DELETE_FROM(tableClass);
                 for (int i = 0; i < kvs.size(); i += 2) {
