@@ -72,6 +72,7 @@
                         if (resCount == 0) {
                             layer.open({
                                 type: 1
+                                ,title: "提示"
                                 ,content: "<div style='padding: 20px 100px;'>修改失败</div>"
                                 ,btn: "确定"
                                 ,btnAlign: 'c'
@@ -91,6 +92,13 @@
             });
             function deleteRows(rowDataList) {
                 if (rowDataList.length == 0) {
+                    layer.open({
+                        type: 1
+                        ,title: "提示"
+                        ,content: "<div style='padding: 20px 100px;'>请先勾选要删除的数据行</div>"
+                        ,btn: "确定"
+                        ,btnAlign: 'c'
+                    });
                     return;
                 }
                 layer.confirm(rowDataList.length == 1 ? "确定删除该行数据？" : `确定删除选中的${rowDataList.length}行数据？`, (index) => {
@@ -110,6 +118,7 @@
                         () => {
                             layer.open({
                                 type: 1
+                                ,title: "提示"
                                 ,content: "<div style='padding: 20px 100px;'>删除成功</div>"
                                 ,btn: "确定"
                                 ,btnAlign: 'c'
