@@ -60,7 +60,7 @@ public class DataView {
         for (Map.Entry<String, Class<?>> entry : tableMap.entrySet()) {
             Class<?> tableClass = entry.getValue();
             TableInfo tableInfo = Handle.getTableInfo(tableClass);
-            tableList.put(entry.getKey(), tableInfo.tableName);
+            tableList.put(entry.getKey(), tableInfo.title);
         }
         return tableList;
     }
@@ -73,11 +73,13 @@ public class DataView {
         for (FieldInfo fieldInfo : tableInfo.fieldInfos) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("field", fieldInfo.columnLabel);
-            jsonObject.put("title", fieldInfo.columnLabel);
+            jsonObject.put("title", fieldInfo.title);
             jsonObject.put("isKey", fieldInfo.isIdColumn);
             jsonObject.put("autoIncrement", fieldInfo.autoIncrement);
             jsonObject.put("align", "center");
-            jsonObject.put("edit", "text");
+            if (!fieldInfo.isIdColumn) {
+                jsonObject.put("edit", "text");
+            }
             tableCols.add(jsonObject);
         }
         return tableCols;
@@ -112,6 +114,31 @@ public class DataView {
         return delCount;
     }
 
+    @HttpGet("/editRow")
+    public int editRow(String tableKey, String KVs, String key, String value) {
+        Class<?> tableClass = tableMap.get(tableKey);
+        System.out.println(new SQL(){{
+            UPDATE(tableClass);
+            SET(key + " = " + PARAM(value));
+            JSONArray kvs = (JSONArray) JSONArray.parse(KVs);
+            for (int i = 0; i < kvs.size(); i += 2) {
+                String key = kvs.getString(i);
+                String value = kvs.getString(i + 1);
+                WHERE(key + " = " + PARAM(value));
+            }
+        }});
+        int count = curd.update(new SQL(){{
+            UPDATE(tableClass);
+            SET(key + " = " + PARAM(value));
+            JSONArray kvs = (JSONArray) JSONArray.parse(KVs);
+            for (int i = 0; i < kvs.size(); i += 2) {
+                String key = kvs.getString(i);
+                String value = kvs.getString(i + 1);
+                WHERE(key + " = " + PARAM(value));
+            }
+        }});
+        return count;
+    }
 
     private JSONObject responseTableInfo(int code, Object data, int count, String msg) {
         JSONObject response = new JSONObject();

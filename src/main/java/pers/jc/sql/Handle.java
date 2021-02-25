@@ -453,11 +453,8 @@ class Handle {
 		TableInfo tableInfo = new TableInfo();
 		
 		Table table = modelClass.getAnnotation(Table.class);
-		if (table.value().equals("")) {
-			tableInfo.tableName = modelClass.getSimpleName();
-		} else {
-			tableInfo.tableName = table.value();
-		}
+		tableInfo.tableName = table.value().isEmpty() ? modelClass.getSimpleName() : table.value();
+		tableInfo.title = table.title().isEmpty() ? tableInfo.tableName : table.title();
 		
 		for (Field field : modelClass.getDeclaredFields()) {
 			Id id = field.getAnnotation(Id.class);
@@ -473,8 +470,9 @@ class Handle {
 					+ field.getName().substring(0, 1).toUpperCase()
 					+ field.getName().substring(1), new Class<?>[]{field.getType()});
 				if (id != null) {
-					fieldInfo.columnLabel = id.value().equals("") ? field.getName() : id.value();
+					fieldInfo.columnLabel = id.value().isEmpty() ? field.getName() : id.value();
 					fieldInfo.isIdColumn = true;
+					fieldInfo.title = id.title().isEmpty() ? fieldInfo.columnLabel : id.title();
 					AutoIncrement autoIncrement = field.getAnnotation(AutoIncrement.class);
 					if (autoIncrement != null) {
 						fieldInfo.autoIncrement = true;
@@ -482,7 +480,12 @@ class Handle {
 					tableInfo.idInfos.add(fieldInfo);
 				}
 				if (column != null) {
-					fieldInfo.columnLabel = column.value().equals("") ? field.getName() : column.value();
+					if (id == null || id.value().isEmpty()) {
+						fieldInfo.columnLabel = column.value().isEmpty() ? field.getName() : column.value();
+					}
+					if (id == null || id.title().isEmpty()) {
+						fieldInfo.title = column.title().isEmpty() ? fieldInfo.columnLabel : column.title();
+					}
 				}
 				tableInfo.fieldInfos.add(fieldInfo);
 			}
@@ -492,6 +495,7 @@ class Handle {
 }
 class TableInfo {
 	public String tableName;
+	public String title;
 	public ArrayList<FieldInfo> idInfos = new ArrayList<>();
 	public ArrayList<FieldInfo> fieldInfos = new ArrayList<>();
 }
@@ -500,6 +504,7 @@ class FieldInfo {
 	public Method getter;
 	public Method setter;
 	public String columnLabel;
+	public String title;
 	public boolean isIdColumn;
 	public boolean autoIncrement;
 }

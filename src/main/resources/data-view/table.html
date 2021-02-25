@@ -54,6 +54,35 @@
                         break;
                 };
             });
+            table.on("edit(render-table)", (obj) => {
+                console.log(obj)
+                let value = obj.value
+                let field = obj.field;
+                let data = obj.data
+                let KVs = [];
+                for (let key of idColumns) {
+                    KVs.push(key);
+                    KVs.push(data[key]);
+                }
+                $.get(
+                    path + "/dataView/editRow",
+                    {tableKey: tableKey, KVs: JSON.stringify(KVs), key: field, value: value},
+                    (resCount) => {
+                        if (resCount == 0) {
+                            layer.open({
+                                type: 1
+                                ,content: "<div style='padding: 20px 100px;'>修改失败</div>"
+                                ,btn: "确定"
+                                ,btnAlign: 'c'
+                                ,yes: () => {
+                                    layer.closeAll();
+                                    table.reload("render-table");
+                                }
+                            });
+                        }
+                    }
+                );
+            });
             table.on("tool(render-table)", (obj) => {
                 if(obj.event == "del"){
                     deleteRows([obj.data]);
@@ -77,7 +106,7 @@
                     $.get(
                         path + "/dataView/deleteRows",
                         {tableKey: tableKey, rowKVsList: JSON.stringify(rowKVsList)},
-                        (res) => {
+                        () => {
                             layer.open({
                                 type: 1
                                 ,content: "<div style='padding: 20px 100px;'>删除成功</div>"
