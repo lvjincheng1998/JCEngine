@@ -40,4 +40,8 @@ public class JCEngine {
 			e.printStackTrace();
 		}
 	}
+
+	public static void main(String[] args) {
+		//打包需要一个启动类
+	}
 }
