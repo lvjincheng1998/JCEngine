@@ -27,6 +27,7 @@
         for (let col of tableCols) {
             if (col.isKey) {
                 idColumns.push(col.field);
+                col.title = "<div style='color: #009688; font-weight: bold;'>" + col.title + "</div>"
             }
         }
         tableCols = [{fixed: "left", type: "checkbox"}].concat(tableCols);

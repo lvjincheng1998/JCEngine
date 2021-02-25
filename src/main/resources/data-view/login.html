@@ -148,13 +148,12 @@
 <script src="js/jquery.min.js"></script>
 <script>
   function login() {
-    let user = $("#user").value();
-    let pwd = $("#pwd").value();
-    console.log(user, pwd);
+    let user = $("#user").val();
+    let pwd = $("#pwd").val();
+    window.localStorage.setItem("JCEngine-DataView-LoginInfo", "user=" + user + "&pwd=" + pwd);
+    window.location.href = "index.html";
   }
-  $("#submit").onclick = () => {
-    login();
-  };
+  $("#submit").on("click", login.bind(this));
   window.addEventListener("keydown", (e) => {
     if (e.key == "Enter") {
       login();
