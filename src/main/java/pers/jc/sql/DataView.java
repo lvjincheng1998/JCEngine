@@ -140,6 +140,20 @@ public class DataView {
         return count;
     }
 
+    @HttpGet("/addRow")
+    public int addRow(String tableKey, String KVs) {
+        Class<?> tableClass = tableMap.get(tableKey);
+        return curd.insert(new SQL(){{
+            INSERT_INTO(tableClass);
+            JSONArray kvs = (JSONArray) JSONArray.parse(KVs);
+            for (int i = 0; i < kvs.size(); i += 2) {
+                String key = kvs.getString(i);
+                String value = kvs.getString(i + 1);
+                VALUES(key, PARAM(value));
+            }
+        }});
+    }
+
     private JSONObject responseTableInfo(int code, Object data, int count, String msg) {
         JSONObject response = new JSONObject();
         response.put("code", code);

@@ -48,7 +48,14 @@
                 let checkStatus = table.checkStatus(obj.config.id);
                 switch(obj.event){
                     case "add":
-                        console.log("add");
+                        layer.open({
+                            title: "添加数据",
+                            type: 2,
+                            area: ['700px', '450px'],
+                            fixed: false,
+                            maxmin: true,
+                            content: 'add.html?cols=' + encodeURIComponent(JSON.stringify(tableCols))
+                        });
                         break;
                     case "del":
                         deleteRows(checkStatus.data);
@@ -56,7 +63,6 @@
                 };
             });
             table.on("edit(render-table)", (obj) => {
-                console.log(obj)
                 let value = obj.value
                 let field = obj.field;
                 let data = obj.data
