@@ -1,5 +1,8 @@
 package pers.jc.sql;
 
+import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.fastjson.JSONObject;
+
 import java.lang.reflect.Field;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -12,9 +15,17 @@ public class CURD {
 	public CURD(Map<String, Object> config) {
 		access = new Access(config);
 	}
+
+	public CURD(DruidDataSource dataSource) {
+		access = new Access(dataSource);
+	}
 	
 	public Access getAccess() {
 		return access;
+	}
+
+	public ArrayList<JSONObject> select(SQL sql) {
+		return Handle.select(access, JSONObject.class, sql.toString());
 	}
 	
 	public <T> ArrayList<T> select(Class<T> modelClass, SQL sql) {

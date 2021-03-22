@@ -1,6 +1,7 @@
 .idea/
 /out/
 /src/META-INF/
+/src/test/java/develop/
 /target/
 /upload/
-*.iml
+*.iml 

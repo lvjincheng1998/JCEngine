@@ -1,7 +1,9 @@
 package pers.jc.sql;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -65,7 +67,9 @@ public class SQL extends AbstractSQL<SQL> {
 		if (type == String.class
 				|| type == Date.class
 				|| type == Time.class
-				|| type == Timestamp.class) {
+				|| type == Timestamp.class
+                || type == JSONObject.class
+                || type == JSONArray.class) {
 			return "'" + String.valueOf(parameter).replace("\\", "\\\\").replace("'", "\\'") + "'";
 		}
 		if (type == Boolean.class || type == boolean.class) {
@@ -78,12 +82,10 @@ public class SQL extends AbstractSQL<SQL> {
 		if (type == int.class || type == Integer.class 
 				|| type == long.class || type == Long.class 
 				|| type == float.class || type == Float.class 
-				|| type == double.class || type == Double.class) {
+				|| type == double.class || type == Double.class
+                || type == BigDecimal.class) {
 			return parameter.toString();
 		}
-		if (type == JSONObject.class) {
-		    return "'" + parameter.toString() + "'";
-        }
 		return "";
 	}
 

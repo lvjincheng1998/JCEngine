@@ -1,5 +1,6 @@
 package pers.jc.sql;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
@@ -304,13 +305,17 @@ class Handle {
 		try {
 			preparedStatement = connection.prepareStatement(sql);
 			resultSet = preparedStatement.executeQuery();
-			TableInfo tableInfo = getTableInfo(modelClass);
-			while (resultSet.next()) {
-				T model = modelClass.newInstance();
-				for (FieldInfo fieldInfo : tableInfo.fieldInfos) {
-					fieldInfo.setter.invoke(model, getResultSetValue(resultSet, fieldInfo.columnLabel, fieldInfo.type));
+			if (modelClass == JSONObject.class) {
+				ResultArray.parseToArrayList(resultSet, list);
+			} else {
+				TableInfo tableInfo = getTableInfo(modelClass);
+				while (resultSet.next()) {
+					T model = modelClass.newInstance();
+					for (FieldInfo fieldInfo : tableInfo.fieldInfos) {
+						fieldInfo.setter.invoke(model, getResultSetValue(resultSet, fieldInfo.columnLabel, fieldInfo.type));
+					}
+					list.add(model);
 				}
-				list.add(model);
 			}
 		} catch (Exception e) {
 			list = ERROR_SELECT();
@@ -406,7 +411,7 @@ class Handle {
 		if (type == BigDecimal.class) {
 			return BigDecimal.class;
 		}
-		if (type == JSONObject.class) {
+		if (type == JSONObject.class || type == JSONArray.class) {
 			return String.class;
 		}
 		return null;
@@ -443,7 +448,7 @@ class Handle {
 		if (type == BigDecimal.class) {
 			return "BigDecimal";
 		}
-		if (type == JSONObject.class) {
+		if (type == JSONObject.class || type == JSONArray.class) {
 			return "String";
 		}
 		return null;

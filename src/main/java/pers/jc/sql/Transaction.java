@@ -1,5 +1,7 @@
 package pers.jc.sql;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -140,6 +142,10 @@ public abstract class Transaction {
 		sql.SELECT_FROM(modelClass);
 		return selectOperate(modelClass, sql.toString());
 	}
+
+	public ArrayList<JSONObject> select(SQL sql) throws Exception {
+		return selectOperate(JSONObject.class, sql.toString());
+	}
 	
 	public <T> T selectOne(Class<T> modelClass, SQL sql) throws Exception {
 		sql.SELECT_FROM(modelClass);
@@ -214,13 +220,17 @@ public abstract class Transaction {
 		preparedStatements.add(preparedStatement);
 		ResultSet resultSet = preparedStatement.executeQuery();
 		resultSets.add(resultSet);
-		TableInfo tableInfo = Handle.getTableInfo(modelClass);
-		while (resultSet.next()) {
-			T model = modelClass.newInstance();
-			for (FieldInfo fieldInfo : tableInfo.fieldInfos) {
-				fieldInfo.setter.invoke(model, Handle.getResultSetValue(resultSet, fieldInfo.columnLabel, fieldInfo.type));
+		if (modelClass == JSONObject.class) {
+			ResultArray.parseToArrayList(resultSet, list);
+		} else {
+			TableInfo tableInfo = Handle.getTableInfo(modelClass);
+			while (resultSet.next()) {
+				T model = modelClass.newInstance();
+				for (FieldInfo fieldInfo : tableInfo.fieldInfos) {
+					fieldInfo.setter.invoke(model, Handle.getResultSetValue(resultSet, fieldInfo.columnLabel, fieldInfo.type));
+				}
+				list.add(model);
 			}
-			list.add(model);
 		}
 		return list;
 	}
