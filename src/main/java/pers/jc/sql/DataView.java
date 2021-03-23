@@ -164,7 +164,7 @@ public class DataView {
         if (!loginVerify) {
             return 1;
         }
-        if (username.equals(user) && pwd.equals(pwd)) {
+        if (username.equals(user) && password.equals(pwd)) {
             return 1;
         }
         return 0;
