@@ -1,8 +1,5 @@
 package pers.jc.sql;
 
-import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidPooledConnection;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Map;
@@ -74,12 +71,6 @@ class Access {
 		}).start();
 	}
 
-	private DruidDataSource dataSource;
-
-	public Access(DruidDataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-		
 	private void keepMinIdle() {
 		while (pool.size() < minIdle && activeCount < maxActive) {
 			Connection connection = createConnection();
@@ -92,16 +83,6 @@ class Access {
 	}
 	
 	protected Connection getConnection() {
-		if (dataSource != null) {
-			Connection connection = null;
-			try {
-				connection = dataSource.getConnection();
-			} catch (Exception throwable) {
-				throwable.printStackTrace();
-			} finally {
-				return connection;
-			}
-		}
 		Connection connection = pool.poll();
 		if (connection != null) {
 			return connection;
@@ -159,14 +140,6 @@ class Access {
 	}
 	
 	protected void addToPool(Connection connection) {
-		if (connection.getClass() == DruidPooledConnection.class) {
-			try {
-				((DruidPooledConnection) connection).recycle();
-			} catch (Exception throwable) {
-				throwable.printStackTrace();
-			}
-			return;
-		}
 		if (minIdle > 0) {
 			pool.add(connection);
 		} else {

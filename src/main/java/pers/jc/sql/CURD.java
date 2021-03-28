@@ -1,6 +1,5 @@
 package pers.jc.sql;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
 
 import java.lang.reflect.Field;
@@ -16,10 +15,6 @@ public class CURD {
 		access = new Access(config);
 	}
 
-	public CURD(DruidDataSource dataSource) {
-		access = new Access(dataSource);
-	}
-	
 	public Access getAccess() {
 		return access;
 	}

@@ -1,5 +1,6 @@
 package pers.jc.sql;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -15,6 +16,8 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 class Handle {
 	public static int ERROR_UPDATE = -1;
@@ -350,17 +353,29 @@ class Handle {
 	
 	public static void setPreparedStatementValue(PreparedStatement preparedStatement, int parameterIndex, Object value) throws Exception { 
 		Method method = preparedStatement.getClass().getMethod("set" + getTypeName(value.getClass()), new Class<?>[]{int.class, getType(value.getClass())});
-		if (value.getClass() == JSONObject.class) {
-			value = JSONObject.toJSONString(value, SerializerFeature.DisableCircularReferenceDetect);
+		if (value.getClass() == JSONObject.class
+				|| value.getClass() == JSONArray.class
+				|| value.getClass().isArray()
+				|| Collection.class.isAssignableFrom(value.getClass())
+				|| Map.class.isAssignableFrom(value.getClass())
+		) {
+			value = JSON.toJSONString(value, SerializerFeature.DisableCircularReferenceDetect);
 		}
 		method.invoke(preparedStatement, new Object[]{parameterIndex, value});
 	}
-	
-	public static Object getResultSetValue(ResultSet resultSet, String columnLabel, Class<?> type) throws Exception {
+
+	public static <T> Object getResultSetValue(ResultSet resultSet, String columnLabel, Class<T> type) throws Exception {
 		Method method = resultSet.getClass().getMethod("get" + getTypeName(type), new Class<?>[]{String.class});
 		Object value = method.invoke(resultSet, new Object[]{columnLabel});
 		if (type == JSONObject.class) {
 			return JSONObject.parseObject(value.toString());
+		} else if (type == JSONArray.class) {
+			return JSONArray.parseObject(value.toString());
+		} else if (type.isArray()
+				|| Collection.class.isAssignableFrom(type)
+				|| Map.class.isAssignableFrom(type)
+		) {
+			return JSON.parseObject(value.toString(), type);
 		}
 		return value;
 	}
@@ -411,7 +426,12 @@ class Handle {
 		if (type == BigDecimal.class) {
 			return BigDecimal.class;
 		}
-		if (type == JSONObject.class || type == JSONArray.class) {
+		if (type == JSONObject.class
+				|| type == JSONArray.class
+				|| type.isArray()
+				|| Collection.class.isAssignableFrom(type)
+				|| Map.class.isAssignableFrom(type)
+		) {
 			return String.class;
 		}
 		return null;
@@ -448,7 +468,12 @@ class Handle {
 		if (type == BigDecimal.class) {
 			return "BigDecimal";
 		}
-		if (type == JSONObject.class || type == JSONArray.class) {
+		if (type == JSONObject.class
+				|| type == JSONArray.class
+				|| type.isArray()
+				|| Collection.class.isAssignableFrom(type)
+				|| Map.class.isAssignableFrom(type)
+		) {
 			return "String";
 		}
 		return null;
