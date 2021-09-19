@@ -35,6 +35,7 @@ public class JCEngine {
 	public static void boot(int port, String path, Class<? extends JCEntity> entityClass) {
 		try {
 			JCEngine.entityClass = entityClass;
+			Dispatcher.addEntityMethod(entityClass);
 			WebSocketServer.run(port, path);
 		} catch (Exception e) {
 			e.printStackTrace();

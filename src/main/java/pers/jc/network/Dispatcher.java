@@ -15,6 +15,7 @@ import java.util.HashMap;
 public class Dispatcher {
     private static HashMap<String, HttpTarget> httpTargetMap = new HashMap<>();
     private static HashMap<String, SocketTarget> socketTargetMap = new HashMap<>();
+    private static HashMap<String, Method> entityMethodMap = new HashMap<>();
 
     public static void addComponent(Class<?> componentClass) throws Exception {
         HttpComponent httpComponent = componentClass.getAnnotation(HttpComponent.class);
@@ -58,7 +59,7 @@ public class Dispatcher {
                     continue;
                 }
                 httpTargetMap.put(targetPath, new HttpTarget(componentInstance, method, httpType));
-                componentLogger.addElement("HttpMethod", componentClass, targetPath,method, httpType);
+                componentLogger.addElement("HttpMethod", componentClass, targetPath, method, httpType);
             }
         }
         componentLogger.log();
@@ -77,10 +78,27 @@ public class Dispatcher {
                     continue;
                 }
                 socketTargetMap.put(targetPath, new SocketTarget(componentInstance, method));
-                componentLogger.addElement("SocketMethod", componentClass, targetPath,method, null);
+                componentLogger.addElement("SocketMethod", componentClass, targetPath, method, null);
             }
         }
         componentLogger.log();
+    }
+
+    public static void addEntityMethod(Class<?> entityClass) throws Exception {
+        ComponentLogger logger = new ComponentLogger();
+        for (Method method : entityClass.getMethods()) {
+            SocketFunction socketFunction = method.getAnnotation(SocketFunction.class);
+            if (socketFunction != null) {
+                String targetPath = method.getName();
+                if (entityMethodMap.containsKey(targetPath)) {
+                    JCLogger.error("Duplicate EntityMethodPath For <" + targetPath + ">");
+                    continue;
+                }
+                entityMethodMap.put(targetPath, method);
+                logger.addElement("EntityMethod", entityClass, targetPath, method, null);
+            }
+        }
+        logger.log();
     }
 
     public static Object handleHttpRequest(HttpRequest httpRequest) throws Exception {
@@ -139,13 +157,24 @@ public class Dispatcher {
             JCLogger.error("SocketFunction<" + data.getFunc() + "> Call Fail Because It's Entity Is Not Valid");
             return;
         }
-        Class<?>[] argTypes = getArgTypes(data.getArgs());
-        Method targetMethod = entity.getClass().getMethod(data.getFunc(), argTypes);
-        if (targetMethod.getAnnotation(SocketFunction.class) == null) {
+//        Class<?>[] argTypes = getArgTypes(data.getArgs());
+//        Method targetMethod = entity.getClass().getMethod(data.getFunc(), argTypes);
+//        if (targetMethod.getAnnotation(SocketFunction.class) == null) {
+//            JCLogger.error("SocketFunction<" + data.getFunc() + "> Is Not Exist");
+//            return;
+//        }
+//        entity.getClass().getMethod(data.getFunc(), argTypes).invoke(entity, data.getArgs());
+        Method targetMethod = entityMethodMap.get(data.getFunc());
+        if (targetMethod == null) {
             JCLogger.error("SocketFunction<" + data.getFunc() + "> Is Not Exist");
             return;
         }
-        entity.getClass().getMethod(data.getFunc(), argTypes).invoke(entity, data.getArgs());
+        Object[] args = data.getArgs();
+        Class<?>[] paramTypes = targetMethod.getParameterTypes();
+        for (int i = 0; i < args.length; i++) {
+            args[i] = convertType(args[i], paramTypes[i]);
+        }
+        targetMethod.invoke(entity, args);
     }
 
     public static JCData handleSocketMethod(JCEntity requester, JCData data) throws Exception {
@@ -204,6 +233,29 @@ public class Dispatcher {
             argTypes[i] = args[i].getClass();
         }
         return argTypes;
+    }
+
+    private static Object convertType(Object data, Class<?> type) {
+        Class dataClass = data.getClass();
+        if (dataClass.equals(type)) {
+            return data;
+        }
+        if (dataClass.equals(JSONObject.class) && !type.equals(JSONObject.class)) {
+            return ((JSONObject) data).toJavaObject(type);
+        }
+        if (dataClass.equals(JSONArray.class) && !type.equals(JSONArray.class)) {
+            return ((JSONArray) data).toJavaObject(type);
+        }
+        if (type.equals(double.class) || type.equals(Double.class)) {
+            return Double.parseDouble(data.toString());
+        }
+        if (type.equals(float.class) || type.equals(Float.class)) {
+            return Float.parseFloat(data.toString());
+        }
+        if (type.equals(String.class) || !dataClass.equals(String.class)) {
+            return data.toString();
+        }
+        return data;
     }
 
     private static class ComponentLogger {
