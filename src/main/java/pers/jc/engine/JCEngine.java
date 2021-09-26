@@ -42,6 +42,12 @@ public class JCEngine {
 		}
 	}
 
+	private static int uuid;
+
+	public static synchronized int UUID() {
+		return ++uuid;
+	}
+
 	public static void main(String[] args) {
 		//打包需要一个启动类
 	}

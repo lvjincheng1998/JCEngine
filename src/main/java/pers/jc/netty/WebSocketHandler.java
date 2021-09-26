@@ -14,12 +14,6 @@ import pers.jc.network.SocketEvent;
 public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 	private Channel channel;
     private JCEntity tempEntity;
-	private static int nextID;
-
-	public static synchronized int generateID() {
-		nextID++;
-		return nextID;
-	}
     
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
@@ -56,7 +50,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
 	@SocketEvent
     public void loadTempEntity() throws Exception {
     	tempEntity = JCEngine.entityClass.newInstance();
-		tempEntity.id = generateID();
+		tempEntity.id = JCEngine.UUID();
 		tempEntity.channel = new JCChannel(channel);
 		tempEntity.isValid = true;
 		call("loadTempEntity", tempEntity.id);
