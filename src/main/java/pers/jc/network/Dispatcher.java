@@ -252,7 +252,7 @@ public class Dispatcher {
         if (type.equals(float.class) || type.equals(Float.class)) {
             return Float.parseFloat(data.toString());
         }
-        if (type.equals(String.class) || !dataClass.equals(String.class)) {
+        if (type.equals(String.class) && !dataClass.equals(String.class)) {
             return data.toString();
         }
         return data;

@@ -42,10 +42,10 @@ public class JCEngine {
 		}
 	}
 
-	private static int uuid;
+	private static int autoIncrementID;
 
-	public static synchronized int UUID() {
-		return ++uuid;
+	public static synchronized int getAutoIncrementID() {
+		return ++autoIncrementID;
 	}
 
 	public static void main(String[] args) {
