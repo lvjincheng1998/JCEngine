@@ -130,6 +130,12 @@ module JCEngineCore {
                 this.tempEntity.onMiss();
             }
         }
+
+        public updateEntityProperties(properties) {
+            for (let propertyName in properties) {
+                this.tempEntity[propertyName] = properties[propertyName];
+            }
+        }
     }
 
     export class CallbackHandler {
@@ -189,4 +195,3 @@ module JCEngineCore {
         METHOD
     }
 }
-
