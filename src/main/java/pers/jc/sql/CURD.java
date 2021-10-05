@@ -22,6 +22,10 @@ public class CURD {
 	public ArrayList<JSONObject> select(SQL sql) {
 		return Handle.select(access, JSONObject.class, sql.toString());
 	}
+
+	public ArrayList<JSONObject> select(String sql) {
+		return Handle.select(access, JSONObject.class, sql);
+	}
 	
 	public <T> ArrayList<T> select(Class<T> modelClass, SQL sql) {
 		sql.SELECT_FROM(modelClass);
@@ -63,6 +67,10 @@ public class CURD {
 	public int insert(SQL sql) {
 		return Handle.executeUpdate(access, sql.toString(), Statement.NO_GENERATED_KEYS);
 	}
+
+	public int insert(String sql) {
+		return Handle.executeUpdate(access, sql, Statement.NO_GENERATED_KEYS);
+	}
 	
 	@SuppressWarnings("unchecked")
 	public <T> int insertAndGenerateKeys(T... models) {
@@ -82,6 +90,10 @@ public class CURD {
 	public int insertAndReturnKey(SQL sql) {
 		return Handle.executeUpdate(access, sql.toString(), Statement.RETURN_GENERATED_KEYS);
 	}
+
+	public int insertAndReturnKey(String sql) {
+		return Handle.executeUpdate(access, sql, Statement.RETURN_GENERATED_KEYS);
+	}
 	
 	@SuppressWarnings("unchecked")
 	public <T> int update(T... models) {
@@ -96,6 +108,10 @@ public class CURD {
 	public int update(SQL sql) {
 		return Handle.executeUpdate(access, sql.toString(), Statement.NO_GENERATED_KEYS);
 	}
+
+	public int update(String sql) {
+		return Handle.executeUpdate(access, sql, Statement.NO_GENERATED_KEYS);
+	}
 	
 	@SuppressWarnings("unchecked")
 	public <T> int delete(T... models) {
@@ -109,6 +125,10 @@ public class CURD {
 	
 	public int delete(SQL sql) {
 		return Handle.executeUpdate(access, sql.toString(), Statement.NO_GENERATED_KEYS);
+	}
+
+	public int delete(String sql) {
+		return Handle.executeUpdate(access, sql, Statement.NO_GENERATED_KEYS);
 	}
 
 	public int getRowCount(Class<?> modelClass) {
