@@ -3,7 +3,7 @@ package pers.jc.engine;
 import java.util.HashMap;
 
 public class JCEntity {
-	public int id;
+	public final int id = JCEngine.getAutoIncrementID(JCEntity.class);
 	public JCChannel channel;
 	public boolean isValid;
 	

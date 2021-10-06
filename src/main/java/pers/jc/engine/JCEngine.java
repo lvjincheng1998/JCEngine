@@ -5,8 +5,7 @@ import pers.jc.netty.WebSocketServer;
 import pers.jc.network.Dispatcher;
 import pers.jc.network.HttpComponent;
 import pers.jc.network.SocketComponent;
-import pers.jc.network.SocketMethod;
-
+import java.util.HashMap;
 import java.util.Set;
 
 public class JCEngine {
@@ -42,13 +41,22 @@ public class JCEngine {
 		}
 	}
 
-	private static int autoIncrementID;
+	private static HashMap<Object, Integer> autoIncrementIDs = new HashMap<>();
 
-	public static synchronized int getAutoIncrementID() {
-		return ++autoIncrementID;
+	public static synchronized int getAutoIncrementID(Object key) {
+		Integer autoIncrementID = autoIncrementIDs.get(key);
+		if (autoIncrementID == null) {
+			autoIncrementID = 1;
+		} else {
+			autoIncrementID++;
+		}
+		autoIncrementIDs.put(key, autoIncrementID);
+		return autoIncrementID;
 	}
 
-	public static void main(String[] args) {
-		//打包需要一个启动类
+	public static synchronized void removeKeyOfAutoIncrementID(Object key) {
+		autoIncrementIDs.remove(key);
 	}
+
+	public static void main(String[] args) {}
 }

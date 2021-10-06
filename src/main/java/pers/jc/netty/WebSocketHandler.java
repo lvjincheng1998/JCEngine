@@ -50,7 +50,6 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
 	@SocketEvent
     public void loadTempEntity() throws Exception {
     	tempEntity = JCEngine.entityClass.newInstance();
-		tempEntity.id = JCEngine.getAutoIncrementID();
 		tempEntity.channel = new JCChannel(channel);
 		tempEntity.isValid = true;
 		call("loadTempEntity", tempEntity.id);
