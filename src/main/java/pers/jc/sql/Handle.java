@@ -370,7 +370,7 @@ class Handle {
 		if (type == JSONObject.class) {
 			return JSONObject.parseObject(value.toString());
 		} else if (type == JSONArray.class) {
-			return JSONArray.parseObject(value.toString());
+			return JSONArray.parseArray(value.toString());
 		} else if (type.isArray()
 				|| Collection.class.isAssignableFrom(type)
 				|| Map.class.isAssignableFrom(type)
