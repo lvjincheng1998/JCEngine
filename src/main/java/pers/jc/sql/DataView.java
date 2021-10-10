@@ -94,7 +94,8 @@ public class DataView {
     public JSONObject showTable(String tableKey, int page, int limit) {
         Class<?> tableClass = tableMap.get(tableKey);
         int count = curd.getRowCount(tableClass);
-        ArrayList<?> data = curd.select(tableClass, new SQL(){{
+        ArrayList<?> data = curd.select(new SQL(){{
+            SELECT_FROM(tableClass);
             LIMIT((page - 1) * limit, limit);
         }});
         return responseTableInfo(0, data, count, "success");
