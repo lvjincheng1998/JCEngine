@@ -54,6 +54,14 @@ public class JCFileTool {
         return lines.toArray(new String[0]);
     }
 
+    public String readStr(File file) throws Exception {
+        FileInputStream fileInputStream = new FileInputStream(file);
+        byte[] bytes = new byte[fileInputStream.available()];
+        fileInputStream.read(bytes);
+        fileInputStream.close();
+        return new String(bytes);
+    }
+
     public void writeStr(File file, String content) throws Exception {
         FileWriter fileWriter = new FileWriter(file);
         fileWriter.write(content);

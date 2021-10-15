@@ -36,7 +36,7 @@ public class JCTimer {
 		return this;
 	}
 
-	public JCTimer once (Runnable runnable, long delay) {
+	public JCTimer once(Runnable runnable, long delay) {
 		timer.schedule(new TimerTask() {
 
 			@Override

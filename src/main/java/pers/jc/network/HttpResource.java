@@ -43,7 +43,7 @@ public class HttpResource {
         byteTypeSet.add(".ttf");
     }
 
-    public static String getSuffix(String uri) {
+    private static String getSuffix(String uri) {
         if (uri == null) return null;
         int lastPointIndex = uri.lastIndexOf(".");
         if (lastPointIndex == -1) return null;

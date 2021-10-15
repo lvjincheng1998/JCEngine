@@ -7,6 +7,7 @@ import pers.jc.network.HttpComponent;
 import pers.jc.network.SocketComponent;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class JCEngine {
 	public static Class<? extends JCEntity> entityClass;
@@ -42,8 +43,10 @@ public class JCEngine {
 	}
 
 	private static HashMap<Object, Integer> autoIncrementIDs = new HashMap<>();
+	private static ReentrantLock autoIncrementIDsLock = new ReentrantLock();
 
-	public static synchronized int getAutoIncrementID(Object key) {
+	public static int getAutoIncrementID(Object key) {
+		autoIncrementIDsLock.lock();
 		Integer autoIncrementID = autoIncrementIDs.get(key);
 		if (autoIncrementID == null) {
 			autoIncrementID = 1;
@@ -51,11 +54,14 @@ public class JCEngine {
 			autoIncrementID++;
 		}
 		autoIncrementIDs.put(key, autoIncrementID);
+		autoIncrementIDsLock.unlock();
 		return autoIncrementID;
 	}
 
-	public static synchronized void removeKeyOfAutoIncrementID(Object key) {
+	public static void removeKeyOfAutoIncrementID(Object key) {
+		autoIncrementIDsLock.lock();
 		autoIncrementIDs.remove(key);
+		autoIncrementIDsLock.unlock();
 	}
 
 	public static void main(String[] args) {}

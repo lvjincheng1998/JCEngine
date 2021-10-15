@@ -1,9 +1,6 @@
 package pers.jc.util;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -54,41 +51,20 @@ public class JCHttp {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            close(connection, inputStream, outputStream, bufferedReader);
+            close(bufferedReader);
+            close(outputStream);
+            close(inputStream);
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
         return result;
     }
 
-    private static void close(
-            HttpURLConnection connection,
-            InputStream inputStream,
-            OutputStream outputStream,
-            BufferedReader bufferedReader
-    ) {
-        if (bufferedReader != null) {
+    private static void close(Closeable closeable) {
+        if (closeable != null) {
             try {
-                bufferedReader.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        if (outputStream != null) {
-            try {
-                outputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        if (inputStream != null) {
-            try {
-                inputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        if (connection != null) {
-            try {
-                connection.disconnect();
+                closeable.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
