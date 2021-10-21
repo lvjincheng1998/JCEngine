@@ -37,29 +37,32 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
     	JCData data = JCData.parse(text);
     	if (data.getType() == JCData.TYPE_EVENT) {
 			Dispatcher.handleSocketEvent(this, data);
-		} else if (data.getType() == JCData.TYPE_FUNCTION) {
-			Dispatcher.handleSocketFunction(tempEntity, data);
-		} else if (data.getType() == JCData.TYPE_METHOD) {
-			JCData resData = Dispatcher.handleSocketMethod(tempEntity, data);
-			if (resData != null) {
-				channel.writeAndFlush(new TextWebSocketFrame(resData.stringify()));
-			}
+		} else if (
+			data.getType() == JCData.TYPE_FUNCTION ||
+			data.getType() == JCData.TYPE_METHOD
+		) {
+			tempEntity.director.requestHandler.offerRequest(tempEntity, data);
 		}
 	}
 
 	@SocketEvent
     public void loadTempEntity() throws Exception {
     	tempEntity = JCEngine.entityClass.newInstance();
+		tempEntity.director = JCEngine.director;
 		tempEntity.channel = new JCChannel(channel);
 		tempEntity.isValid = true;
-		call("loadTempEntity", tempEntity.id);
-		tempEntity.onLoad();
+		tempEntity.director.callbackHandler.offerCallback(() -> {
+			call("loadTempEntity", tempEntity.id);
+			tempEntity.onLoad();
+		});
     }
     
     private void destroyTempEntity() {
 		if (tempEntity != null) {
-			tempEntity.isValid = false;
-			tempEntity.onDestroy();
+			tempEntity.director.callbackHandler.offerCallback(() -> {
+				tempEntity.isValid = false;
+				tempEntity.onDestroy();
+			});
 		}
     }
 }

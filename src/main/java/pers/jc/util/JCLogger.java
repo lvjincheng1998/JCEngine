@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class JCLogger {
 	private static int level = 1;
@@ -20,7 +21,7 @@ public class JCLogger {
 
 	private static File logCatalog;
 	private static File logFile;
-	private static int logFileID;
+	private static AtomicInteger logFileID = new AtomicInteger();
 	private static long logFileLength;
 	private static long logOutputInterval;
 	private static boolean logWriterStart;
@@ -45,13 +46,13 @@ public class JCLogger {
 		}
 	}
 
-	private synchronized static int nextLogFileID() {
-		logFileID++;
-		return logFileID;
+	public static void main(String[] args) {
+		System.out.println(logFileID.addAndGet(1));
+		System.out.println(logFileID.intValue());
 	}
 	
 	private static void createLogFile() throws Exception {
-		String logFileName = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss_").format(new Date()) + nextLogFileID() + ".log";
+		String logFileName = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss_").format(new Date()) + logFileID.addAndGet(1) + ".log";
 		String logFilePath = logCatalog.getPath() + File.separator + logFileName;
 		logFile = new File(logFilePath);
 		if (!logFile.exists() && !logFile.createNewFile()) {

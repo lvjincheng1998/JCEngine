@@ -9,16 +9,15 @@ public class JCCache {
     private final HashMap<String, CacheMapValue> cacheMap = new HashMap<>();
     private final ReentrantReadWriteLock cacheMapLock = new ReentrantReadWriteLock();
 
-    private static JCCache ins;
-
-    public static synchronized JCCache ins() {
-        if (ins == null) {
-            ins = new JCCache();
-        }
-        return ins;
+    private static final class SingletonHolder {
+        private static final JCCache INSTANCE = new JCCache();
     }
 
-    public JCCache() {
+    public static JCCache ins() {
+        return SingletonHolder.INSTANCE;
+    }
+
+    private JCCache() {
         autoClear();
     }
 

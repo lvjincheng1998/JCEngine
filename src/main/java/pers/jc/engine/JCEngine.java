@@ -1,15 +1,20 @@
 package pers.jc.engine;
 
 import org.reflections.Reflections;
+import pers.jc.logic.Director;
 import pers.jc.netty.WebSocketServer;
 import pers.jc.network.Dispatcher;
 import pers.jc.network.HttpComponent;
 import pers.jc.network.SocketComponent;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class JCEngine {
+	public static final ExecutorService executorService = Executors.newCachedThreadPool();
+	public static final Director director = new Director();
 	public static Class<? extends JCEntity> entityClass;
 
 	public static void addComponent(Class<?> componentClass) {
@@ -58,9 +63,9 @@ public class JCEngine {
 		return autoIncrementID;
 	}
 
-	public static void removeKeyOfAutoIncrementID(Object key) {
+	public static void removeKeyOfAutoIncrementID(Object... keys) {
 		autoIncrementIDsLock.lock();
-		autoIncrementIDs.remove(key);
+		for (Object key : keys) autoIncrementIDs.remove(key);
 		autoIncrementIDsLock.unlock();
 	}
 

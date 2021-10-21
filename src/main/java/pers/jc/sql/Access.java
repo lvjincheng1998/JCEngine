@@ -19,7 +19,7 @@ class Access {
 	protected ConcurrentLinkedQueue<Connection> pool = new ConcurrentLinkedQueue<>();
 	private volatile int activeCount = 0;
 	
-	public Access(Map<String, Object> config) {
+	protected Access(Map<String, Object> config) {
 		Object driver = config.get("driver");
 		this.driver = (driver == null) ? "com.mysql.cj.jdbc.Driver" : (String) driver;
 		
@@ -92,20 +92,18 @@ class Access {
 			return connection;
 		}
 		if (minIdle > 0) {
-			synchronized (this) {
-				while((connection = pool.poll()) == null){}
-				return connection;
-			}
+			while((connection = pool.poll()) == null){}
+			return connection;
 		}
 		return null;
 	}
 	
 	private Connection createConnection() {
-		if(changeActiveCount(+1)){
+		if(addActiveCount()){
 			try {
 				return DriverManager.getConnection(url, username, password);
 			} catch (Exception e) {
-				changeActiveCount(-1);
+				subActiveCount();
 				e.printStackTrace();
 			}
 		}
@@ -119,19 +117,20 @@ class Access {
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
-				changeActiveCount(-1);
+				subActiveCount();
 			}
 		}
 	}
-	
-	private synchronized boolean changeActiveCount(int variable) {
-		if (variable > 0) {
-			if (activeCount < maxActive) {
-				activeCount++;
-				return true;
-			}
-			return false;
+
+	private synchronized boolean addActiveCount() {
+		if (activeCount < maxActive) {
+			activeCount++;
+			return true;
 		}
+		return false;
+	}
+
+	private synchronized boolean subActiveCount() {
 		if (activeCount > 0) {
 			activeCount--;
 			return true;
