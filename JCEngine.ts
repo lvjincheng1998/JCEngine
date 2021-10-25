@@ -18,6 +18,7 @@ export class JCEntity {
     public channel: JCEngineCore.Channel;
     public isValid: boolean;
     public loaded: boolean;
+    public parts: Map<string, any> = new Map<string, any>();
 
     public onLoad() {}
 
@@ -103,7 +104,20 @@ module JCEngineCore {
             }
             if (data.type == DataType.FUNCTION) {
                 if (this.tempEntity.isValid) {
-                    this.tempEntity[data.func].apply(this.tempEntity, data.args); 
+                    let func = data.func;
+                    let context = this.tempEntity;;
+                    let pointIndex = func.lastIndexOf(".");
+                    if (pointIndex > -1) {
+                        context = null;
+                        let key = func.substring(0, pointIndex);
+                        let matchContext = this.tempEntity.parts.get(key);
+                        if (matchContext) {
+                            let arr = func.split(".");
+                            func = arr[arr.length - 1];
+                            context = matchContext;
+                        }
+                    }
+                    if (context) context[func].apply(context, data.args);
                 }
                 return;
             }
