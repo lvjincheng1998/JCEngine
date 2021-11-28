@@ -227,7 +227,7 @@ public abstract class Transaction {
 			while (resultSet.next()) {
 				T model = modelClass.newInstance();
 				for (FieldInfo fieldInfo : tableInfo.fieldInfos) {
-					fieldInfo.setter.invoke(model, Handle.getResultSetValue(resultSet, fieldInfo.columnLabel, fieldInfo.type));
+					fieldInfo.setter.invoke(model, Handle.getResultSetValue(resultSet, fieldInfo.columnLabel, fieldInfo.type, fieldInfo.serialize));
 				}
 				list.add(model);
 			}
@@ -265,7 +265,7 @@ public abstract class Transaction {
 					continue;
 				} else {
 					Object value = fieldInfo.getter.invoke(model, new Object[]{});
-					Handle.setPreparedStatementValue(preparedStatement, parameterIndex, value);
+					Handle.setPreparedStatementValue(preparedStatement, parameterIndex, value, fieldInfo.serialize);
 					parameterIndex++;
 				}
 			}
@@ -328,13 +328,13 @@ public abstract class Transaction {
 					continue;
 				} else {
 					Object value = fieldInfo.getter.invoke(model, new Object[]{});
-					Handle.setPreparedStatementValue(preparedStatement, parameterIndex, value);
+					Handle.setPreparedStatementValue(preparedStatement, parameterIndex, value, fieldInfo.serialize);
 					parameterIndex++;
 				}
 			}
 			for (FieldInfo idInfo : tableInfo.idInfos) {
 				Object id = idInfo.getter.invoke(model, new Object[]{});
-				Handle.setPreparedStatementValue(preparedStatement, parameterIndex, id);
+				Handle.setPreparedStatementValue(preparedStatement, parameterIndex, id, idInfo.serialize);
 				parameterIndex++;
 			}
 			preparedStatement.addBatch();
@@ -370,7 +370,7 @@ public abstract class Transaction {
 			int parameterIndex = 1;
 			for (FieldInfo idInfo : tableInfo.idInfos) {
 				Object id = idInfo.getter.invoke(model, new Object[]{});
-				Handle.setPreparedStatementValue(preparedStatement, parameterIndex, id);
+				Handle.setPreparedStatementValue(preparedStatement, parameterIndex, id, idInfo.serialize);
 				parameterIndex++;
 			}
 			preparedStatement.addBatch();

@@ -109,7 +109,7 @@ class Handle {
 				int parameterIndex = 1;
 				for (FieldInfo idInfo : tableInfo.idInfos) {
 					Object id = idInfo.getter.invoke(model, new Object[]{});
-					setPreparedStatementValue(preparedStatement, parameterIndex, id);
+					setPreparedStatementValue(preparedStatement, parameterIndex, id, idInfo.serialize);
 					parameterIndex++;
 				}
 				preparedStatement.addBatch();
@@ -179,13 +179,13 @@ class Handle {
 						continue;
 					} else {
 						Object value = fieldInfo.getter.invoke(model, new Object[]{});
-						setPreparedStatementValue(preparedStatement, parameterIndex, value);
+						setPreparedStatementValue(preparedStatement, parameterIndex, value, fieldInfo.serialize);
 						parameterIndex++;
 					}
 				}
 				for (FieldInfo idInfo : tableInfo.idInfos) {
 					Object id = idInfo.getter.invoke(model, new Object[]{});
-					setPreparedStatementValue(preparedStatement, parameterIndex, id);
+					setPreparedStatementValue(preparedStatement, parameterIndex, id, idInfo.serialize);
 					parameterIndex++;
 				}
 				preparedStatement.addBatch();
@@ -252,7 +252,7 @@ class Handle {
 						continue;
 					} else {
 						Object value = fieldInfo.getter.invoke(model, new Object[]{});
-						setPreparedStatementValue(preparedStatement, parameterIndex, value);
+						setPreparedStatementValue(preparedStatement, parameterIndex, value, fieldInfo.serialize);
 						parameterIndex++;
 					}
 				}
@@ -315,7 +315,7 @@ class Handle {
 				while (resultSet.next()) {
 					T model = modelClass.newInstance();
 					for (FieldInfo fieldInfo : tableInfo.fieldInfos) {
-						fieldInfo.setter.invoke(model, getResultSetValue(resultSet, fieldInfo.columnLabel, fieldInfo.type));
+						fieldInfo.setter.invoke(model, getResultSetValue(resultSet, fieldInfo.columnLabel, fieldInfo.type, fieldInfo.serialize));
 					}
 					list.add(model);
 				}
@@ -351,27 +351,30 @@ class Handle {
 		}
 	}
 	
-	public static void setPreparedStatementValue(PreparedStatement preparedStatement, int parameterIndex, Object value) throws Exception { 
-		Method method = preparedStatement.getClass().getMethod("set" + getTypeName(value.getClass()), new Class<?>[]{int.class, getType(value.getClass())});
-		if (value.getClass() == JSONObject.class
-				|| value.getClass() == JSONArray.class
-				|| value.getClass().isArray()
-				|| Collection.class.isAssignableFrom(value.getClass())
-				|| Map.class.isAssignableFrom(value.getClass())
+	public static void setPreparedStatementValue(PreparedStatement preparedStatement, int parameterIndex, Object value, boolean serialize) throws Exception {
+		Class type = value.getClass();
+		Method method = preparedStatement.getClass().getMethod("set" + getTypeName(value.getClass(), serialize), new Class<?>[]{int.class, getType(type, serialize)});
+		if (serialize
+				|| type == JSONObject.class
+				|| type == JSONArray.class
+				|| type.isArray()
+				|| Collection.class.isAssignableFrom(type)
+				|| Map.class.isAssignableFrom(type)
 		) {
 			value = JSON.toJSONString(value, SerializerFeature.DisableCircularReferenceDetect);
 		}
 		method.invoke(preparedStatement, new Object[]{parameterIndex, value});
 	}
 
-	public static <T> Object getResultSetValue(ResultSet resultSet, String columnLabel, Class<T> type) throws Exception {
-		Method method = resultSet.getClass().getMethod("get" + getTypeName(type), new Class<?>[]{String.class});
+	public static <T> Object getResultSetValue(ResultSet resultSet, String columnLabel, Class<T> type, boolean serialize) throws Exception {
+		Method method = resultSet.getClass().getMethod("get" + getTypeName(type, serialize), new Class<?>[]{String.class});
 		Object value = method.invoke(resultSet, new Object[]{columnLabel});
 		if (type == JSONObject.class) {
 			return JSONObject.parseObject(value.toString());
 		} else if (type == JSONArray.class) {
 			return JSONArray.parseArray(value.toString());
-		} else if (type.isArray()
+		} else if (serialize
+				|| type.isArray()
 				|| Collection.class.isAssignableFrom(type)
 				|| Map.class.isAssignableFrom(type)
 		) {
@@ -395,7 +398,7 @@ class Handle {
 		}
 	}
 	
-	private static Class<?> getType(Class<?> type){
+	private static Class<?> getType(Class<?> type, boolean serialize){
 		if (type == String.class) {
 			return String.class;
 		}
@@ -426,7 +429,8 @@ class Handle {
 		if (type == BigDecimal.class) {
 			return BigDecimal.class;
 		}
-		if (type == JSONObject.class
+		if (serialize
+				|| type == JSONObject.class
 				|| type == JSONArray.class
 				|| type.isArray()
 				|| Collection.class.isAssignableFrom(type)
@@ -437,7 +441,7 @@ class Handle {
 		return null;
 	}
 	
-	private static String getTypeName(Class<?> type) {
+	private static String getTypeName(Class<?> type, boolean serialize) {
 		if (type == String.class) {
 			return "String";
 		}
@@ -468,7 +472,8 @@ class Handle {
 		if (type == BigDecimal.class) {
 			return "BigDecimal";
 		}
-		if (type == JSONObject.class
+		if (serialize
+				|| type == JSONObject.class
 				|| type == JSONArray.class
 				|| type.isArray()
 				|| Collection.class.isAssignableFrom(type)
@@ -510,6 +515,7 @@ class Handle {
 					tableInfo.idInfos.add(fieldInfo);
 				}
 				if (column != null) {
+					fieldInfo.serialize = column.serialize();
 					if (id == null || id.value().isEmpty()) {
 						fieldInfo.columnLabel = column.value().isEmpty() ? field.getName() : column.value();
 					}
@@ -537,4 +543,5 @@ class FieldInfo {
 	public String title;
 	public boolean isIdColumn;
 	public boolean autoIncrement;
+	public boolean serialize;
 }

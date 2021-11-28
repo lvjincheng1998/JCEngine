@@ -12,4 +12,5 @@ import java.lang.annotation.Target;
 public @interface Column {
 	String value() default "";
 	String title() default "";
+	boolean serialize() default false;
 }
