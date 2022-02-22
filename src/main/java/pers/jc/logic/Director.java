@@ -1,8 +1,5 @@
 package pers.jc.logic;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 public class Director {
     public final Scheduler scheduler = new Scheduler();
     public final RequestHandler requestHandler = new RequestHandler();
@@ -13,7 +10,7 @@ public class Director {
             while (true) {
                 try {
                     Thread.sleep(1);
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 loopCheck();

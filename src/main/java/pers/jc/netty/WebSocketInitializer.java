@@ -11,15 +11,15 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 public class WebSocketInitializer extends ChannelInitializer<SocketChannel> {
     private final String path;
 
-    public WebSocketInitializer(String path) {
+    protected WebSocketInitializer(String path) {
         this.path = path;
     }
 
     @Override
-    public void initChannel(SocketChannel ch) {
+    protected void initChannel(SocketChannel ch) {
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast(new HttpServerCodec());
-        pipeline.addLast(new HttpObjectAggregator(64 * 1024 * 1204));
+        pipeline.addLast(new HttpObjectAggregator(64 * 1024));
         pipeline.addLast(new ChunkedWriteHandler());
         pipeline.addLast(new HttpRequestHandler(path));
         pipeline.addLast(new WebSocketServerProtocolHandler(path));

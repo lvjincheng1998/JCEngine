@@ -32,8 +32,8 @@ public class JCFileTool {
         FileOutputStream fileOutputStream;
         FileChannel channelIn;
         FileChannel channelOut;
-        fileInputStream = new FileInputStream(new File(oldPath));
-        fileOutputStream = new FileOutputStream(new File(newPath));
+        fileInputStream = new FileInputStream(oldPath);
+        fileOutputStream = new FileOutputStream(newPath);
         channelIn = fileInputStream.getChannel();
         channelOut = fileOutputStream.getChannel();
         channelOut.transferFrom(channelIn, 0, channelIn.size());
@@ -55,16 +55,27 @@ public class JCFileTool {
     }
 
     public String readStr(File file) throws Exception {
-        FileInputStream fileInputStream = new FileInputStream(file);
-        byte[] bytes = new byte[fileInputStream.available()];
-        fileInputStream.read(bytes);
-        fileInputStream.close();
-        return new String(bytes);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+        StringBuilder stringBuilder = new StringBuilder();
+        String line;
+        boolean lineFeed = false;
+        while ((line = bufferedReader.readLine()) != null) {
+            stringBuilder.append(line).append("\n");
+            lineFeed = true;
+        }
+        if (lineFeed) stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
+        bufferedReader.close();
+        return stringBuilder.toString();
     }
 
     public void writeStr(File file, String content) throws Exception {
-        FileWriter fileWriter = new FileWriter(file);
-        fileWriter.write(content);
-        fileWriter.close();
+        // 获取该文件的缓冲输出流
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));
+        // 写入信息
+        bufferedWriter.write(content);
+        // 清空缓冲区
+        bufferedWriter.flush();
+        // 关闭输出流
+        bufferedWriter.close();
     }
 }

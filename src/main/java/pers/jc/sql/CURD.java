@@ -1,11 +1,8 @@
 package pers.jc.sql;
 
 import com.alibaba.fastjson.JSONObject;
-
-import java.lang.reflect.Field;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class CURD {
@@ -153,16 +150,5 @@ public class CURD {
 		sql.SELECT("COUNT(*) AS res");
 		sql.FROM(tableName);
 		return Handle.getRowCount(access, sql.toString());
-	}
-
-	public static Map<String, String> getDictionary(Class<?> modelClass) {
-		Map<String, String> dictionary = new HashMap<>();
-		for (Field field : modelClass.getDeclaredFields()) {
-			Description description = field.getAnnotation(Description.class);
-			if (description != null) {
-				dictionary.put(field.getName(), description.value());
-			}
-		}
-		return dictionary;
 	}
 }

@@ -2,8 +2,11 @@ package pers.jc.logic;
 
 import java.util.LinkedList;
 
+/**
+ * 1、不要在多线程环境中直接使用该类的接口
+ * 2、如果要在别的线程调用该类的接口，建议借用CallbackHandler类中的offerCallback方法来调用Scheduler类的接口。
+ */
 public class Scheduler {
-    private long currentTimeMillis = 0;
     private LinkedList<ScheduleInfo> toAdds = new LinkedList<>();
     private LinkedList<ScheduleInfo> toRuns = new LinkedList<>();
 
@@ -25,9 +28,9 @@ public class Scheduler {
         scheduleInfo.interval = interval;
         scheduleInfo.repeat = repeat;
         scheduleInfo.delay = delay;
-        scheduleInfo.lastTime = currentTimeMillis;
         scheduleInfo.executeCount = 0;
         scheduleInfo.isValid = true;
+        scheduleInfo.calculateNextRunTime();
         toAdds.add(scheduleInfo);
     }
 
@@ -41,23 +44,21 @@ public class Scheduler {
     }
 
     protected void update() {
-        currentTimeMillis = System.currentTimeMillis();
+        long currentTimeMillis = System.currentTimeMillis();
         toRuns.addAll(toAdds);
         toAdds.clear();
         toRuns.forEach(scheduleInfo -> {
-            if (!scheduleInfo.isValid) return;
-            long deltaTime = currentTimeMillis - scheduleInfo.lastTime;
-            long interval = (scheduleInfo.executeCount == 0 ? scheduleInfo.delay : scheduleInfo.interval);
-            if (deltaTime >= interval) {
+            while (currentTimeMillis >= scheduleInfo.nextRunTime) {
+                if (!scheduleInfo.isValid) return;
                 try {
                     scheduleInfo.runnable.run();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                scheduleInfo.lastTime = currentTimeMillis;
+                scheduleInfo.calculateNextRunTime();
                 scheduleInfo.executeCount++;
                 if (scheduleInfo.repeat >= 0) {
-                    if (scheduleInfo.executeCount - 1 >= scheduleInfo.repeat) {
+                    if (scheduleInfo.executeCount > scheduleInfo.repeat) {
                         scheduleInfo.isValid = false;
                     }
                 }
@@ -73,8 +74,16 @@ public class Scheduler {
         int repeat;
         long delay;
         //运行参数
-        long lastTime;
+        long nextRunTime;
         int executeCount;
         boolean isValid;
+        //method
+        public void calculateNextRunTime() {
+            if (nextRunTime == 0) {
+                nextRunTime = System.currentTimeMillis();
+            }
+            long nextInterval = executeCount == 0 ? delay : interval;
+            nextRunTime += nextInterval;
+        }
     }
 }

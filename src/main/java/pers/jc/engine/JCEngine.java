@@ -4,7 +4,6 @@ import org.reflections.Reflections;
 import pers.jc.logic.Director;
 import pers.jc.netty.WebSocketServer;
 import pers.jc.network.Dispatcher;
-import pers.jc.network.HttpComponent;
 import pers.jc.network.SocketComponent;
 import java.util.HashMap;
 import java.util.Set;
@@ -27,11 +26,7 @@ public class JCEngine {
 
 	public static void scanPackage(String targetPackage) {
 		Reflections reflections = new Reflections(targetPackage);
-		Set<Class<?>> httpComponents = reflections.getTypesAnnotatedWith(HttpComponent.class);
 		Set<Class<?>> socketComponents = reflections.getTypesAnnotatedWith(SocketComponent.class);
-		for (Class<?> httpComponent : httpComponents) {
-			addComponent(httpComponent);
-		}
 		for (Class<?> socketComponent : socketComponents) {
 			addComponent(socketComponent);
 		}

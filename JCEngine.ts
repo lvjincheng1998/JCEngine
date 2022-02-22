@@ -8,7 +8,7 @@ export class JCEngine {
         new JCEngineCore.WebSocketServer(url, null);
     }
 
-    public static reBoot(entity: JCEntity) {
+    public static reboot(entity: JCEntity) {
         new JCEngineCore.WebSocketServer(this.url, entity);
     }
 }
@@ -18,7 +18,7 @@ export class JCEntity {
     public channel: JCEngineCore.Channel;
     public isValid: boolean;
     public loaded: boolean;
-    public parts: Map<string, any> = new Map<string, any>();
+    public components: Map<string, any> = new Map<string, any>();
 
     public onLoad() {}
 
@@ -110,7 +110,7 @@ module JCEngineCore {
                     if (pointIndex > -1) {
                         context = null;
                         let key = func.substring(0, pointIndex);
-                        let matchContext = this.tempEntity.parts.get(key);
+                        let matchContext = this.tempEntity.components.get(key);
                         if (matchContext) {
                             let arr = func.split(".");
                             func = arr[arr.length - 1];
@@ -170,7 +170,7 @@ module JCEngineCore {
             if (this.mapper.size > 10) {
                 let now = Date.now();
                 for (let item of (this.mapper as any)) {
-                    let key = item[0].deadTime;
+                    let key = item[0];
                     let value = item[1];
                     if (now >= value.deadTime) {
                         this.mapper.delete(key);
@@ -180,7 +180,7 @@ module JCEngineCore {
             let callbackInfo = this.mapper.get(data.uuid);
             if (callbackInfo && callbackInfo.callback instanceof Function) {
                 this.mapper.delete(data.uuid);
-                callbackInfo.callback(data.args[0]);
+                callbackInfo.callback(...data.args);
             }
         }
     } 

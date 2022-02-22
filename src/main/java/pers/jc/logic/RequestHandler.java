@@ -25,10 +25,7 @@ public class RequestHandler {
                 if (data.getType() == JCData.TYPE_FUNCTION) {
                     Dispatcher.handleSocketFunction(entity, data);
                 } else if (data.getType() == JCData.TYPE_METHOD) {
-                    JCData resData = Dispatcher.handleSocketMethod(entity, data);
-                    if (resData != null) {
-                        entity.channel.writeAndFlush(resData.stringify());
-                    }
+                    Dispatcher.handleSocketMethod(entity, data);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
