@@ -15,6 +15,8 @@ public class JCEngine {
 	public static final ExecutorService executorService = Executors.newCachedThreadPool();
 	public static final Director director = new Director();
 	public static Class<? extends JCEntity> entityClass;
+	/**传输内容最大长度 */
+	public static int maxContentLength = 64 * 1024;
 
 	public static void addComponent(Class<?> componentClass) {
 		try {
