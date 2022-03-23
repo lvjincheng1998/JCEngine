@@ -3,6 +3,7 @@ package pers.jc.network;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import pers.jc.engine.JCData;
+import pers.jc.engine.JCEngine;
 import pers.jc.engine.JCEntity;
 import pers.jc.netty.WebSocketHandler;
 import pers.jc.util.JCLogger;
@@ -86,6 +87,22 @@ public class Dispatcher {
             args[i] = convertType(args[i], paramTypes[i]);
         }
         targetMethod.invoke(entity, args);
+    }
+
+    public static boolean checkAndAsyncDoneSocketMethod(JCEntity requester, JCData data) {
+        SocketTarget socketTarget = socketTargetMap.get(data.getFunc());
+        SocketMethod socketMethod = socketTarget.getMethod().getAnnotation(SocketMethod.class);
+        if (socketMethod.async()) {
+            JCEngine.executorService.execute(() -> {
+                try {
+                    handleSocketMethod(requester, data);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            return true;
+        }
+        return false;
     }
 
     public static void handleSocketMethod(JCEntity requester, JCData data) throws Exception {

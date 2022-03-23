@@ -37,11 +37,13 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
     	JCData data = JCData.parse(text);
     	if (data.getType() == JCData.TYPE_EVENT) {
 			Dispatcher.handleSocketEvent(this, data);
-		} else if (
-			data.getType() == JCData.TYPE_FUNCTION ||
-			data.getType() == JCData.TYPE_METHOD
-		) {
+		} else if (data.getType() == JCData.TYPE_FUNCTION) {
 			tempEntity.director.requestHandler.offerRequest(tempEntity, data);
+		} else if (data.getType() == JCData.TYPE_METHOD) {
+			boolean isAsync = Dispatcher.checkAndAsyncDoneSocketMethod(tempEntity, data);
+			if (!isAsync) {
+				tempEntity.director.requestHandler.offerRequest(tempEntity, data);
+			}
 		}
 	}
 
