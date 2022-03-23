@@ -53,6 +53,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
 		tempEntity.director = JCEngine.director;
 		tempEntity.channel = new JCChannel(channel);
 		tempEntity.isValid = true;
+		tempEntity.authed = JCEngine.defaultAuthValue;
 		tempEntity.director.callbackHandler.offerCallback(() -> {
 			call("loadTempEntity", tempEntity.id);
 			tempEntity.onLoad();

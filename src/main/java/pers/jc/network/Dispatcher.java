@@ -9,7 +9,6 @@ import pers.jc.netty.WebSocketHandler;
 import pers.jc.util.JCLogger;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.math.BigDecimal;
 import java.util.HashMap;
 
 public class Dispatcher {
@@ -81,6 +80,11 @@ public class Dispatcher {
             JCLogger.error("SocketFunction<" + data.getFunc() + "> Is Not Exist");
             return;
         }
+        SocketFunction socketFunction = targetMethod.getAnnotation(SocketFunction.class);
+        if (socketFunction.auth() && !entity.authed) {
+            JCLogger.error("SocketFunction<" + data.getFunc() + "> Invoke Need Entity Authed");
+            return;
+        }
         Object[] args = data.getArgs();
         Class<?>[] paramTypes = targetMethod.getParameterTypes();
         for (int i = 0; i < args.length; i++) {
@@ -113,6 +117,11 @@ public class Dispatcher {
         SocketTarget socketTarget = socketTargetMap.get(data.getFunc());
         if (socketTarget == null) {
             JCLogger.error("SocketMethod<" + data.getFunc() + "> Is Not Exist");
+            return;
+        }
+        SocketMethod socketMethod = socketTarget.getMethod().getAnnotation(SocketMethod.class);
+        if (socketMethod.auth() && !requester.authed) {
+            JCLogger.error("SocketMethod<" + data.getFunc() + "> Invoke Need Entity Authed");
             return;
         }
         Parameter[] parameters = socketTarget.getMethod().getParameters();

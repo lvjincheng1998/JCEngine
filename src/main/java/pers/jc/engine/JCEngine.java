@@ -17,6 +17,8 @@ public class JCEngine {
 	public static Class<? extends JCEntity> entityClass;
 	/**传输内容最大长度 */
 	public static int maxContentLength = 64 * 1024;
+	/**默认Entity是否已认证（默认Yes），未认证会阻止用户调用服务端函数 */
+	public static boolean defaultAuthValue = true;
 
 	public static void addComponent(Class<?> componentClass) {
 		try {

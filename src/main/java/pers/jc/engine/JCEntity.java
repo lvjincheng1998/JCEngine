@@ -7,6 +7,8 @@ public class JCEntity {
 	public Director director;
 	public JCChannel channel;
 	public boolean isValid;
+	/**是否已认证，未认证会阻止用户调用服务端函数 */
+	public boolean authed;
 	
 	public void onLoad() {}	
 	

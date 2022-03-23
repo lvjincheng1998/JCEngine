@@ -5,4 +5,7 @@ import java.lang.annotation.*;
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SocketFunction {}
+public @interface SocketFunction {
+    /**是否需要认证后才能调用 */
+    boolean auth() default true;
+}
