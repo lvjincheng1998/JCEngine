@@ -79,5 +79,5 @@ export default class Player extends JCEntity {
 
 ```
 //启动入口
-JCEngine.boot("ws://127.0.0.1:9831/JCEngine", Player);
+JCEngine.boot("ws://127.0.0.1:9831/JCEngine", new Player());
 ```
