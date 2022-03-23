@@ -109,30 +109,7 @@ public class Dispatcher {
                 castArgs[i] = new SocketResponse(requester, data);
             } else {
                 Object arg = data.getArgs()[argIndex];
-                if (arg.getClass().equals(JSONObject.class)) {
-                    castArgs[i] = ((JSONObject) arg).toJavaObject(parameter.getType());
-                } else if (arg.getClass().equals(JSONArray.class)) {
-                    castArgs[i] = ((JSONArray) arg).toJavaObject(parameter.getType());
-                } else if (
-                    arg.getClass().equals(BigDecimal.class) &&
-                    !parameter.getType().equals(BigDecimal.class)
-                ) {
-                    if (
-                        parameter.getType().equals(double.class) ||
-                        parameter.getType().equals(Double.class)
-                    ) {
-                        castArgs[i] = Double.parseDouble(arg.toString());
-                    } else if (
-                        parameter.getType().equals(float.class) ||
-                        parameter.getType().equals(Float.class)
-                    ) {
-                        castArgs[i] = Float.parseFloat(arg.toString());
-                    } else {
-                        throw new Exception("Argument Doesn't Match Type <BigDecimal>");
-                    }
-                } else {
-                    castArgs[i] = arg;
-                }
+                castArgs[i] = convertType(arg, parameter.getType());
                 argIndex++;
             }
         }
