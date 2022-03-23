@@ -1,11 +1,9 @@
 export class JCEngine {
     public static url: string;
-    public static entityClass: new() => JCEntity;
 
-    public static boot(url: string, entityClass: new() => JCEntity) {
+    public static boot(url: string, entity: JCEntity) {
         this.url = url;
-        this.entityClass = entityClass;
-        new JCEngineCore.WebSocketServer(url, null);
+        new JCEngineCore.WebSocketServer(url, entity);
     }
 
     public static reboot(entity: JCEntity) {
@@ -71,7 +69,7 @@ module JCEngineCore {
     
         constructor(url: string, entity: JCEntity) {
             this.webSocket = new WebSocket(url);
-            this.tempEntity = entity ? entity : new JCEngine.entityClass();
+            this.tempEntity = entity;
     
             this.webSocket.onopen = () => {
                 this.call("loadTempEntity");
