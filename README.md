@@ -60,14 +60,14 @@ export default class Player extends JCEntity {
     }
     public onDestroy(): void { //销毁监听，与服务端已断开连接
         console.log("onDestroy");
-        JCEngine.reBoot(this); //重新连接服务端
+        JCEngine.reboot(this); //重新连接服务端
     }
     public onReload(): void { //重载入监听，与服务端再次建立连接（断线重连）
         console.log("onReload");
     }
     public onMiss(): void { //迷失监听，与服务端无法建立连接
         console.log("onMiss");
-        JCEngine.reBoot(this); //重新连接服务端
+        JCEngine.reboot(this); //重新连接服务端
     }
 
     //声明一些接口供服务端调用
