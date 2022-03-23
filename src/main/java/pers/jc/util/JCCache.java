@@ -27,17 +27,17 @@ public class JCCache {
             return;
         }
         cacheMapLock.writeLock().lock();
-        cacheMap.put(key, new CacheMapValue(value, 0));
+        cacheMap.put(key, new CacheMapValue(value, -1));
         cacheMapLock.writeLock().unlock();
     }
 
-    public void put(String key, Object value, long timeMillis) {
+    public void put(String key, Object value, long timeout) {
         if (key == null || value == null) {
             JCLogger.errorStackTrace("JCCache Put Key Or Value Can Not Be Null");
             return;
         }
         cacheMapLock.writeLock().lock();
-        cacheMap.put(key, new CacheMapValue(value, System.currentTimeMillis() + timeMillis));
+        cacheMap.put(key, new CacheMapValue(value, timeout));
         cacheMapLock.writeLock().unlock();
     }
 
@@ -90,7 +90,7 @@ public class JCCache {
     }
 
     private boolean isValid(CacheMapValue cacheMapValue) {
-        if (cacheMapValue != null && (cacheMapValue.timeout == 0 || System.currentTimeMillis() < cacheMapValue.timeout)) {
+        if (cacheMapValue != null && (cacheMapValue.timeout == -1 || System.currentTimeMillis() < cacheMapValue.timeout)) {
             return true;
         }
         return false;
@@ -100,7 +100,7 @@ public class JCCache {
         Thread thread = new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(1000 * 10);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
