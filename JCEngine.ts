@@ -34,9 +34,6 @@ export class JCEntity {
             let type = JCEngineCore.DataType.FUNCTION;
             if (func.indexOf(".") > -1) {
                 type = JCEngineCore.DataType.METHOD;
-                if (!callback) {
-                    callback = arguments[arguments.length - 1];
-                }
                 uuid = JCEngineCore.CallbackHandler.addCallback(callback);
             }
             if (args == undefined) {
@@ -112,8 +109,7 @@ module JCEngineCore {
                         let key = func.substring(0, pointIndex);
                         let matchContext = this.tempEntity.components.get(key);
                         if (matchContext) {
-                            let arr = func.split(".");
-                            func = arr[arr.length - 1];
+                            func = func.substring(pointIndex + 1);
                             context = matchContext;
                         }
                     }
