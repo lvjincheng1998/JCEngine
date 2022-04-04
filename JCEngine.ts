@@ -66,6 +66,7 @@ module JCEngineCore {
     export class WebSocketServer {
         private webSocket: WebSocket;
         private tempEntity: JCEntity;
+        private heartBeatTimerID: number; 
     
         constructor(url: string, entity: JCEntity) {
             this.webSocket = new WebSocket(url);
@@ -128,9 +129,18 @@ module JCEngineCore {
                 this.tempEntity.loaded ? this.tempEntity.onReload() : this.tempEntity.onLoad();
             } catch (e) {}
             this.tempEntity.loaded = true;
+            if (this.heartBeatTimerID === undefined) {
+                this.heartBeatTimerID = setInterval(() => {
+                    this.call("doHeartBeat");
+                }, 5 * 1000);
+            }
         }
     
         public destroyTempEntity() {
+            if (this.heartBeatTimerID !== undefined) {
+                clearInterval(this.heartBeatTimerID);
+                this.heartBeatTimerID = undefined;
+            }
             if (this.tempEntity.isValid) {
                 this.tempEntity.isValid = false;
                 this.tempEntity.onDestroy();            
