@@ -1,8 +1,11 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using BestHTTP.WebSocket;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using JC.Unity;
+using UnityEngine;
 
 namespace JCEngineCore {
     public class JCEngine {
@@ -65,6 +68,7 @@ namespace JCEngineCore {
     class WebSocketServer {
         private WebSocket webSocket;
         private JCEntity tempEntity;
+        private Coroutine heartBeatCoroutine;  
         public WebSocketServer(string url, JCEntity entity) {
             this.webSocket = new WebSocket(new Uri(url));
             this.webSocket.StartPingThread = true;
@@ -141,13 +145,28 @@ namespace JCEngineCore {
                 }
             } catch (Exception) {}
             this.tempEntity.loaded = true;
+            if (heartBeatCoroutine == null) {
+                heartBeatCoroutine = CoroutineStarter.Start(doHeartBeat());
+            }
         }
         public void destroyTempEntity() {
+            if (heartBeatCoroutine != null) {
+                CoroutineStarter.Stop(heartBeatCoroutine);
+                heartBeatCoroutine = null;
+            }
             if (this.tempEntity.isValid) {
                 this.tempEntity.isValid = false;
                 this.tempEntity.onDestroy();            
             } else {
                 this.tempEntity.onMiss();
+            }
+        }
+        IEnumerator doHeartBeat() {
+            while (true) {
+                try {
+                    call("doHeartBeat");
+                } catch (System.Exception) {}
+                yield return new WaitForSecondsRealtime(5f);
             }
         }
     }
