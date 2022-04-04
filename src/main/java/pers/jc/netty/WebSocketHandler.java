@@ -58,6 +58,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
 			call("loadTempEntity", tempEntity.id);
 			tempEntity.onLoad();
 		});
+		addToHeartBeatHandler();
     }
     
     private void destroyTempEntity() {
@@ -68,4 +69,17 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
 			});
 		}
     }
+
+	@SocketEvent
+	public void doHeartBeat() {
+		heartBeatTimeRecord = System.currentTimeMillis();
+	}
+	public long heartBeatTimeRecord;
+	private void addToHeartBeatHandler() {
+		heartBeatTimeRecord = System.currentTimeMillis();
+		HeartBeatHandler.ins.addEntity(this);
+	}
+	public void die() {
+		channel.close();
+	}
 }
