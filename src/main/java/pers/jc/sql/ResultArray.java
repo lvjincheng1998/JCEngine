@@ -20,6 +20,8 @@ public class ResultArray {
                         jsonObject.put(columnName, resultSet.getArray(columnName));
                         break;
                     case java.sql.Types.BIGINT:
+                        jsonObject.put(columnName, resultSet.getLong(columnName));
+                        break;
                     case java.sql.Types.INTEGER:
                     case java.sql.Types.TINYINT:
                     case java.sql.Types.SMALLINT:
