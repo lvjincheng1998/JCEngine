@@ -95,6 +95,9 @@ public class Dispatcher {
 
     public static boolean checkAndAsyncDoneSocketMethod(JCEntity requester, JCData data) {
         SocketTarget socketTarget = socketTargetMap.get(data.getFunc());
+        if (socketTarget == null) {
+            return false;
+        }
         SocketMethod socketMethod = socketTarget.getMethod().getAnnotation(SocketMethod.class);
         if (socketMethod.async()) {
             JCEngine.executorService.execute(() -> {
