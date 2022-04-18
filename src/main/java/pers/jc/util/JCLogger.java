@@ -1,11 +1,7 @@
 package pers.jc.util;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class JCLogger {
 	private static int level = 1;
@@ -18,87 +14,12 @@ public class JCLogger {
 	private static final String LEVEL_WARN_SIGN = "[WARN]";
 	private static final String LEVEL_ERROR_SIGN = "[ERROR]";
 	private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
-
-	private static File logCatalog;
-	private static File logFile;
-	private static AtomicInteger logFileID = new AtomicInteger();
-	private static long logFileLength;
-	private static long logOutputInterval;
-	private static boolean logOutputToFile;
-	private static final ConcurrentLinkedQueue<String> logQueue = new ConcurrentLinkedQueue<>();
-
-	public static void setLogCatalog(String catalog) {
-		setLogCatalog(catalog, 4 * 1024 * 1024, 1000);
-	}
-	
-	public static void setLogCatalog(String catalog, long fileLength, long outputInterval) {
-		try {
-			logCatalog = new File(catalog);
-			if (!logCatalog.exists() && !logCatalog.mkdirs()) {
-				throw new Exception();
-			}
-			createLogFile();
-			logFileLength = fileLength;
-			logOutputInterval = outputInterval;
-			logOutputToFile = true;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private static void createLogFile() throws Exception {
-		String logFileName = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss_").format(new Date()) + logFileID.addAndGet(1) + ".log";
-		String logFilePath = logCatalog.getPath() + File.separator + logFileName;
-		logFile = new File(logFilePath);
-		if (!logFile.exists() && !logFile.createNewFile()) {
-			throw new Exception();
-		}
-	}
-
-	static {
-		createLogWriter();
-	}
-	
-	private static void createLogWriter() {
-		new Thread(() -> {
-			while (true) {
-				try {
-					if (logOutputToFile) {
-						Thread.sleep(logOutputInterval);
-						String log;
-						FileWriter fileWriter = new FileWriter(logFile, true);
-						while ((log = logQueue.poll()) != null) {
-							if (logFile.length() >= logFileLength) {
-								fileWriter.close();
-								createLogFile();
-								fileWriter = new FileWriter(logFile, true);
-							}
-							fileWriter.write(log);
-						}
-						fileWriter.close();
-					} else {
-						Thread.sleep(10);
-						String log;
-						while ((log = logQueue.poll()) != null) {
-							if (log.startsWith(LEVEL_ERROR_SIGN)) {
-								System.err.print(log);
-							} else {
-								System.out.print(log);
-							}
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-	}
 	
 	public static void setLevel(int level) {
 		JCLogger.level = level;
 	}
 	
-	private static void addLogToQueue(Object[] msg, String levelSign, boolean showStackTrace) {
+	private static void println(Object[] msg, int levelID, String levelSign, boolean showStackTrace) {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append(levelSign).append(" ");
 		stringBuilder.append(simpleDateFormat.format(new Date()));
@@ -119,41 +40,45 @@ public class JCLogger {
 			}
 		}
 		String log = stringBuilder.toString();
-		logQueue.add(log);
+		if (levelID == LEVEL_ERROR) {
+			System.err.print(log);
+		} else {
+			System.out.print(log);
+		}
 	}
 	
 	public static void debug(Object... msg) {
 		if (level > LEVEL_DEBUG) {
 			return;
 		}
-		addLogToQueue(msg, LEVEL_DEBUG_SIGN, false);
+		println(msg, LEVEL_DEBUG, LEVEL_DEBUG_SIGN, false);
 	}
 	
 	public static void info(Object... msg) {
 		if (level > LEVEL_INFO) {
 			return;
 		}
-		addLogToQueue(msg, LEVEL_INFO_SIGN, false);
+		println(msg, LEVEL_INFO, LEVEL_INFO_SIGN, false);
 	}
 	
 	public static void warn(Object... msg) {
 		if (level > LEVEL_WARN) {
 			return;
 		}
-		addLogToQueue(msg, LEVEL_WARN_SIGN, false);
+		println(msg, LEVEL_WARN, LEVEL_WARN_SIGN, false);
 	}
 	
 	public static void error(Object... msg) {
 		if (level > LEVEL_ERROR) {
 			return;
 		}
-		addLogToQueue(msg, LEVEL_ERROR_SIGN, false);
+		println(msg, LEVEL_ERROR, LEVEL_ERROR_SIGN, false);
 	}
 
 	public static void errorStackTrace(Object... msg) {
 		if (level > LEVEL_ERROR) {
 			return;
 		}
-		addLogToQueue(msg, LEVEL_ERROR_SIGN, true);
+		println(msg, LEVEL_ERROR, LEVEL_ERROR_SIGN, true);
 	}
 }
