@@ -151,8 +151,4 @@ public class CURD {
 		sql.FROM(tableName);
 		return Handle.getRowCount(access, sql.toString());
 	}
-
-	public int getRowCountBySQL(String sql) {
-		return Handle.getRowCount(access, sql);
-	}
 }
