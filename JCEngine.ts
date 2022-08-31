@@ -66,7 +66,7 @@ module JCEngineCore {
     export class WebSocketServer {
         private webSocket: WebSocket;
         private tempEntity: JCEntity;
-        private heartBeatTimerID: number; 
+        private heartBeatTimerID: number | undefined;
     
         constructor(url: string, entity: JCEntity) {
             this.webSocket = new WebSocket(url);
@@ -101,7 +101,7 @@ module JCEngineCore {
             if (data.type == DataType.FUNCTION) {
                 if (this.tempEntity.isValid) {
                     let func = data.func;
-                    let context = this.tempEntity;;
+                    let context: JCEngine | null = this.tempEntity;
                     let pointIndex = func.lastIndexOf(".");
                     if (pointIndex > -1) {
                         context = null;
@@ -159,7 +159,7 @@ module JCEngineCore {
             return this.nextID.toString();
         }
     
-        public static addCallback(callback: Function): string {
+        public static addCallback(callback?: Function): string {
             let uuid = this.uuid();
             if (callback instanceof Function) {
                 this.mapper.set(uuid, {
