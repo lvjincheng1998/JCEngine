@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class CURD {
-	private Access access;
+	private final Access access;
 	
 	public CURD(Map<String, Object> config) {
 		access = new Access(config);

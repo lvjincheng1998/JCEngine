@@ -3,72 +3,67 @@ package pers.jc.sql;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 class Access {
-	private String driver;
-	private String host;
-	private int port;
-	private String url;
-	private String username;
-	private String password;
-	private String database;
-	private int minIdle;
-	private int maxActive;
-	private long clearInterval;
+	private final String url;
+	private final String username;
+	private final String password;
+	private final int minIdle;
+	private final int maxActive;
 	protected ConcurrentLinkedQueue<Connection> pool = new ConcurrentLinkedQueue<>();
 	private volatile int activeCount = 0;
 	
 	protected Access(Map<String, Object> config) {
-		Object driver = config.get("driver");
-		this.driver = (driver == null) ? "com.mysql.cj.jdbc.Driver" : (String) driver;
+		Object tempValue;
+
+		tempValue = config.get("driver");
+		String driver = (tempValue == null) ? "com.mysql.cj.jdbc.Driver" : (String) tempValue;
+
+		tempValue = config.get("host");
+		String host = (tempValue == null) ? "127.0.0.1" : (String) tempValue;
+
+		tempValue = config.get("port");
+		int port = (tempValue == null) ? 3306 : (int) tempValue;
+
+		tempValue = config.get("username");
+		username = (tempValue == null) ? "root" : (String) tempValue;
 		
-		Object host = config.get("host");
-		this.host = (host == null) ? "127.0.0.1" : (String) host;
+		tempValue = config.get("password");
+		password = (tempValue == null) ? "123456" : (String) tempValue;
+
+		tempValue = config.get("database");
+		String database = (tempValue == null) ? "test" : (String) tempValue;
 		
-		Object port = config.get("port");
-		this.port = (port == null) ? 3306 : (int) port;
+		tempValue = config.get("minIdle");
+		minIdle = (tempValue == null) ? 5 : (int) tempValue;
 		
-		Object username = config.get("username");
-		this.username = (username == null) ? "root" : (String) username;
+		tempValue = config.get("maxActive");
+		maxActive = (tempValue == null) ? 20 : (int) tempValue;
 		
-		Object password = config.get("password");
-		this.password = (password == null) ? "123456" : (String) password;
+		tempValue = config.get("clearInterval");
+		long clearInterval = (tempValue == null) ? 3000 : (long) tempValue;
 		
-		Object database = config.get("database");
-		this.database = (database == null) ? "test" : (String) database;
-		
-		Object minIdle = config.get("minIdle");
-		this.minIdle = (minIdle == null) ? 5 : (int) minIdle;
-		
-		Object maxActive = config.get("maxActive");
-		this.maxActive = (maxActive == null) ? 20 : (int) maxActive;
-		
-		Object clearInterval = config.get("clearInterval");
-		this.clearInterval = (clearInterval == null) ? 3000 : (long) clearInterval;
-		
-		this.url = "jdbc:mysql://" + this.host + ':' + this.port + '/' + this.database
+		url = "jdbc:mysql://" + host + ':' + port + '/' + database
 			+ "?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&useSSL=false";
 		
 		try {
-			Class.forName(this.driver);
+			Class.forName(driver);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
 		keepMinIdle();
-		
-		new Thread(() -> {
-			while (true) {
-				try {
-					Thread.sleep(this.clearInterval);
-					closeConnection(pool.poll());
-					keepMinIdle();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+
+		new Timer().schedule(new TimerTask() {
+			@Override
+			public void run() {
+				closeConnection(pool.poll());
+				keepMinIdle();
 			}
-		}).start();
+		}, 0, clearInterval);
 	}
 
 	private void keepMinIdle() {
@@ -92,7 +87,9 @@ class Access {
 			return connection;
 		}
 		if (minIdle > 0) {
-			while((connection = pool.poll()) == null){}
+			do {
+				connection = pool.poll();
+			} while (connection == null);
 			return connection;
 		}
 		return null;
@@ -130,12 +127,10 @@ class Access {
 		return false;
 	}
 
-	private synchronized boolean subActiveCount() {
+	private synchronized void subActiveCount() {
 		if (activeCount > 0) {
 			activeCount--;
-			return true;
 		}
-		return false;
 	}
 	
 	protected void addToPool(Connection connection) {
