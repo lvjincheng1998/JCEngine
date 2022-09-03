@@ -11,7 +11,7 @@ public class JCData {
 	private String uuid;
 	private int type;
 	private String func;
-	private Object args[];
+	private Object[] args;
 	
 	public JCData() {}
 	

@@ -13,8 +13,8 @@ import java.lang.reflect.Parameter;
 import java.util.HashMap;
 
 public class Dispatcher {
-    private static HashMap<String, SocketTarget> socketTargetMap = new HashMap<>();
-    private static HashMap<String, Method> entityMethodMap = new HashMap<>();
+    private static final HashMap<String, SocketTarget> socketTargetMap = new HashMap<>();
+    private static final HashMap<String, Method> entityMethodMap = new HashMap<>();
 
     public static void registerComponent(Class<?> componentClass) throws Exception {
         SocketComponent socketComponent = componentClass.getAnnotation(SocketComponent.class);
@@ -154,14 +154,14 @@ public class Dispatcher {
     }
 
     private static Object convertType(Object data, Class<?> type) {
-        Class dataClass = data.getClass();
+        Class<?> dataClass = data.getClass();
         if (dataClass.equals(type)) {
             return data;
         }
-        if (dataClass.equals(JSONObject.class) && !type.equals(JSONObject.class)) {
+        if (dataClass.equals(JSONObject.class)) {
             return ((JSONObject) data).toJavaObject(type);
         }
-        if (dataClass.equals(JSONArray.class) && !type.equals(JSONArray.class)) {
+        if (dataClass.equals(JSONArray.class)) {
             return ((JSONArray) data).toJavaObject(type);
         }
         if (type.equals(double.class) || type.equals(Double.class)) {
@@ -170,29 +170,35 @@ public class Dispatcher {
         if (type.equals(float.class) || type.equals(Float.class)) {
             return Float.parseFloat(data.toString());
         }
-        if (type.equals(String.class) && !dataClass.equals(String.class)) {
+        if (type.equals(String.class)) {
             return data.toString();
         }
         return data;
     }
 
     private static class ComponentLogger {
-        private StringBuilder stringBuilder = new StringBuilder();
+        private final StringBuilder stringBuilder = new StringBuilder();
 
         public void addElement(String methodType, Class<?> componentClass, String targetPath, Method method) {
             String[] parameterNames = new String[method.getParameters().length];
             for (int i = 0; i < parameterNames.length; i++) {
                 parameterNames[i] = method.getParameters()[i].getType().getName();
             }
-            StringBuilder contentBuilder = new StringBuilder();
-            contentBuilder.append("Add " + methodType);
-            contentBuilder.append(" -Path: " + targetPath);
-            contentBuilder.append(" -Target: " + componentClass.getName() + "." + method.getName());
-            contentBuilder.append("(" + String.join(", ", parameterNames) + ")");
+            String content = "Add ";
+            content += methodType;
+            content += " -Path: ";
+            content += targetPath;
+            content += " -Target: ";
+            content += componentClass.getName();
+            content += ".";
+            content += method.getName();
+            content += "(";
+            content += String.join(", ", parameterNames);
+            content += ")";
             if (stringBuilder.length() > 0) {
-                stringBuilder.append("\n");
+                content += "\n";
             }
-            stringBuilder.append(contentBuilder);
+            stringBuilder.append(content);
         }
 
         public void log() {

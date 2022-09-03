@@ -4,7 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 public class JCChannel {
-	private Channel channel;
+	private final Channel channel;
 	
 	public JCChannel(Channel channel) {
 		this.channel = channel;

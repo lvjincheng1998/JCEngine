@@ -4,8 +4,8 @@ import pers.jc.engine.JCData;
 import pers.jc.engine.JCEntity;
 
 public class SocketResponse {
-    private JCEntity entity;
-    private JCData data;
+    private final JCEntity entity;
+    private final JCData data;
 
     public SocketResponse(JCEntity entity, JCData data) {
         this.entity = entity;
