@@ -1,8 +1,6 @@
 package pers.jc.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class JCCache {
@@ -51,7 +49,7 @@ public class JCCache {
             cacheMapLock.writeLock().lock();
             CacheMapValue cacheMapValue = cacheMap.remove(key);
             if (isValid(cacheMapValue)) {
-                value = type.cast(cacheMapValue.getValue());
+                value = type.cast(cacheMapValue.value);
             }
         } finally {
             cacheMapLock.writeLock().unlock();
@@ -63,7 +61,7 @@ public class JCCache {
         boolean result = false;
         cacheMapLock.writeLock().lock();
         CacheMapValue cacheMapValue = cacheMap.get(key);
-        if (isValid(cacheMapValue) && cacheMapValue.getValue().equals(value)) {
+        if (isValid(cacheMapValue) && cacheMapValue.value.equals(value)) {
             cacheMap.remove(key);
             result = true;
         }
@@ -81,7 +79,7 @@ public class JCCache {
             cacheMapLock.readLock().lock();
             CacheMapValue cacheMapValue = cacheMap.get(key);
             if (isValid(cacheMapValue)) {
-                value = type.cast(cacheMapValue.getValue());
+                value = type.cast(cacheMapValue.value);
             }
         } finally {
             cacheMapLock.readLock().unlock();
@@ -90,22 +88,15 @@ public class JCCache {
     }
 
     private boolean isValid(CacheMapValue cacheMapValue) {
-        if (cacheMapValue != null && (cacheMapValue.timeout == -1 || System.currentTimeMillis() < cacheMapValue.timeout)) {
-            return true;
-        }
-        return false;
+        return cacheMapValue != null && (cacheMapValue.timeout == -1 || System.currentTimeMillis() < cacheMapValue.timeout);
     }
 
     private void autoClear() {
-        Thread thread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(1000 * 10);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
                 cacheMapLock.writeLock().lock();
-                ArrayList<String> timeoutKeys = new ArrayList();
+                ArrayList<String> timeoutKeys = new ArrayList<>();
                 for (Map.Entry<String, CacheMapValue> entry : cacheMap.entrySet()) {
                     if (!isValid(entry.getValue())) {
                         timeoutKeys.add(entry.getKey());
@@ -116,33 +107,15 @@ public class JCCache {
                 }
                 cacheMapLock.writeLock().unlock();
             }
-        });
-        thread.setDaemon(true);
-        thread.start();
+        }, 0, 10 * 1000);
     }
 
-    private class CacheMapValue {
-        private Object value;
-        private long timeout;
+    private static class CacheMapValue {
+        Object value;
+        long timeout;
 
-        public CacheMapValue(Object value, long timeout) {
+        CacheMapValue(Object value, long timeout) {
             this.value = value;
-            this.timeout = timeout;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public void setValue(Object value) {
-            this.value = value;
-        }
-
-        public long getTimeout() {
-            return timeout;
-        }
-
-        public void setTimeout(long timeout) {
             this.timeout = timeout;
         }
     }
