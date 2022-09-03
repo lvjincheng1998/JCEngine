@@ -7,6 +7,7 @@ import pers.jc.engine.JCEngine;
 import pers.jc.engine.JCEntity;
 import pers.jc.netty.WebSocketHandler;
 import pers.jc.util.JCLogger;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
@@ -15,35 +16,31 @@ public class Dispatcher {
     private static HashMap<String, SocketTarget> socketTargetMap = new HashMap<>();
     private static HashMap<String, Method> entityMethodMap = new HashMap<>();
 
-    public static void addComponent(Class<?> componentClass) throws Exception {
+    public static void registerComponent(Class<?> componentClass) throws Exception {
         SocketComponent socketComponent = componentClass.getAnnotation(SocketComponent.class);
         if (socketComponent != null) {
-            addSocketComponent(componentClass, socketComponent);
+            ComponentLogger componentLogger = new ComponentLogger();
+            String componentPath = socketComponent.value().isEmpty() ? componentClass.getName() : socketComponent.value();
+            Object componentInstance = componentClass.newInstance();
+            for (Method method : componentClass.getMethods()) {
+                SocketMethod socketMethod = method.getAnnotation(SocketMethod.class);
+                if (socketMethod != null) {
+                    String targetPath = componentPath + "." + method.getName();
+                    if (socketTargetMap.containsKey(targetPath)) {
+                        JCLogger.error("Duplicate SocketTargetPath For <" + targetPath + ">");
+                        continue;
+                    }
+                    socketTargetMap.put(targetPath, new SocketTarget(componentInstance, method));
+                    componentLogger.addElement("SocketMethod", componentClass, targetPath, method);
+                }
+            }
+            componentLogger.log();
         } else {
             JCLogger.error("No Component For " + componentClass.getName());
         }
     }
 
-    private static void addSocketComponent(Class<?> componentClass, SocketComponent component) throws Exception {
-        ComponentLogger componentLogger = new ComponentLogger();
-        String componentPath = component.value().isEmpty() ? componentClass.getName() : component.value();
-        Object componentInstance = componentClass.newInstance();
-        for (Method method : componentClass.getMethods()) {
-            SocketMethod socketMethod = method.getAnnotation(SocketMethod.class);
-            if (socketMethod != null) {
-                String targetPath = componentPath + "." + method.getName();
-                if (socketTargetMap.containsKey(targetPath)) {
-                    JCLogger.error("Duplicate SocketTargetPath For <" + targetPath + ">");
-                    continue;
-                }
-                socketTargetMap.put(targetPath, new SocketTarget(componentInstance, method));
-                componentLogger.addElement("SocketMethod", componentClass, targetPath, method);
-            }
-        }
-        componentLogger.log();
-    }
-
-    public static void addEntityMethod(Class<?> entityClass) {
+    public static void registerEntity(Class<?> entityClass) {
         ComponentLogger logger = new ComponentLogger();
         for (Method method : entityClass.getMethods()) {
             SocketFunction socketFunction = method.getAnnotation(SocketFunction.class);
@@ -67,66 +64,45 @@ public class Dispatcher {
             JCLogger.error("SocketEvent<" + data.getFunc() + "> Is Not Exist");
             return;
         }
-        webSocketHandler.getClass().getMethod(data.getFunc(), argTypes).invoke(webSocketHandler, data.getArgs());
+        targetMethod.invoke(webSocketHandler, data.getArgs());
     }
 
-    public static void handleSocketFunction(JCEntity entity, JCData data) throws  Exception {
-        if (entity == null || !entity.isValid) {
-            JCLogger.error("SocketFunction<" + data.getFunc() + "> Call Fail Because It's Entity Is Not Valid");
-            return;
-        }
+    public static void handleSocketFunction(JCEntity entity, JCData data) {
         Method targetMethod = entityMethodMap.get(data.getFunc());
         if (targetMethod == null) {
             JCLogger.error("SocketFunction<" + data.getFunc() + "> Is Not Exist");
             return;
         }
         SocketFunction socketFunction = targetMethod.getAnnotation(SocketFunction.class);
-        if (socketFunction.auth() && !entity.authed) {
-            JCLogger.error("SocketFunction<" + data.getFunc() + "> Invoke Need Entity Authed");
-            return;
-        }
         Object[] args = data.getArgs();
         Class<?>[] paramTypes = targetMethod.getParameterTypes();
         for (int i = 0; i < args.length; i++) {
             args[i] = convertType(args[i], paramTypes[i]);
         }
-        targetMethod.invoke(entity, args);
+        JCEngine.gameService.execute(() -> {
+            if (!entity.isValid) {
+                JCLogger.error("SocketFunction<" + data.getFunc() + "> Call Fail Because It's Entity Is Not Valid");
+                return;
+            }
+            if (socketFunction.auth() && !entity.authed) {
+                JCLogger.error("SocketFunction<" + data.getFunc() + "> Invoke Need Entity Authed");
+                return;
+            }
+            try {
+                targetMethod.invoke(entity, args);
+            } catch (Exception e) {
+                JCLogger.error(e.getMessage());
+            }
+        });
     }
 
-    public static boolean checkAndAsyncDoneSocketMethod(JCEntity requester, JCData data) {
-        SocketTarget socketTarget = socketTargetMap.get(data.getFunc());
-        if (socketTarget == null) {
-            return false;
-        }
-        SocketMethod socketMethod = socketTarget.getMethod().getAnnotation(SocketMethod.class);
-        if (socketMethod.async()) {
-            JCEngine.executorService.execute(() -> {
-                try {
-                    handleSocketMethod(requester, data);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-            return true;
-        }
-        return false;
-    }
-
-    public static void handleSocketMethod(JCEntity requester, JCData data) throws Exception {
-        if (requester == null || !requester.isValid) {
-            JCLogger.error("SocketMethod<" + data.getFunc() + "> Call Fail Because It's Entity Is Not Valid");
-            return;
-        }
+    public static void handleSocketMethod(JCEntity requester, JCData data) {
         SocketTarget socketTarget = socketTargetMap.get(data.getFunc());
         if (socketTarget == null) {
             JCLogger.error("SocketMethod<" + data.getFunc() + "> Is Not Exist");
             return;
         }
         SocketMethod socketMethod = socketTarget.getMethod().getAnnotation(SocketMethod.class);
-        if (socketMethod.auth() && !requester.authed) {
-            JCLogger.error("SocketMethod<" + data.getFunc() + "> Invoke Need Entity Authed");
-            return;
-        }
         Parameter[] parameters = socketTarget.getMethod().getParameters();
         Object[] castArgs = new Object[parameters.length];
         int argIndex = 0;
@@ -142,7 +118,31 @@ public class Dispatcher {
                 argIndex++;
             }
         }
-        socketTarget.getMethod().invoke(socketTarget.getInstance(), castArgs);
+        JCEngine.gameService.execute(() -> {
+            if (!requester.isValid) {
+                JCLogger.error("SocketMethod<" + data.getFunc() + "> Call Fail Because It's Entity Is Not Valid");
+                return;
+            }
+            if (socketMethod.auth() && !requester.authed) {
+                JCLogger.error("SocketMethod<" + data.getFunc() + "> Invoke Need Entity Authed");
+                return;
+            }
+            if (socketMethod.async()) {
+                JCEngine.asyncService.execute(() -> {
+                    try {
+                        socketTarget.getMethod().invoke(socketTarget.getInstance(), castArgs);
+                    } catch (Exception e) {
+                        JCLogger.error(e.getMessage());
+                    }
+                });
+                return;
+            }
+            try {
+                socketTarget.getMethod().invoke(socketTarget.getInstance(), castArgs);
+            } catch (Exception e) {
+                JCLogger.error(e.getMessage());
+            }
+        });
     }
 
     private static Class<?>[] getArgTypes(Object[] args) {

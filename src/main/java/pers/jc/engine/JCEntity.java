@@ -1,10 +1,7 @@
 package pers.jc.engine;
 
-import pers.jc.logic.Director;
-
 public class JCEntity {
 	public final int id = JCEngine.getAutoIncrementID(JCEntity.class);
-	public Director director;
 	public JCChannel channel;
 	public boolean isValid;
 	/**是否已认证，未认证会阻止用户调用服务端函数 */

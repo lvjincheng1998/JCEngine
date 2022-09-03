@@ -6,7 +6,6 @@ public class HeartBeatHandler {
     public static final HeartBeatHandler ins = new HeartBeatHandler();
     private static final long checkInterval = 30 * 1000;
     private final HashSet<WebSocketHandler> wsSet = new HashSet<>();
-    private final Deque<WebSocketHandler> wsRemoveQueue = new LinkedList<>();
 
     private HeartBeatHandler() {
         new Timer().schedule(new TimerTask() {
@@ -18,19 +17,20 @@ public class HeartBeatHandler {
     }
 
     public synchronized void addEntity(WebSocketHandler ws) {
+        ws.heartBeatTimeRecord = System.currentTimeMillis();
         wsSet.add(ws);
     }
 
     private synchronized void checkHeartBeat() {
         long currentTime = System.currentTimeMillis();
-        for (WebSocketHandler ws: wsSet) {
+        Iterator<WebSocketHandler> iterator = wsSet.iterator();
+        WebSocketHandler ws;
+        while (iterator.hasNext()) {
+            ws = iterator.next();
             if (currentTime - ws.heartBeatTimeRecord > checkInterval) {
                 ws.die();
-                wsRemoveQueue.addLast(ws);
+                iterator.remove();
             }
-        }
-        while (!wsRemoveQueue.isEmpty()) {
-            wsSet.remove(wsRemoveQueue.removeFirst());
         }
     }
 }

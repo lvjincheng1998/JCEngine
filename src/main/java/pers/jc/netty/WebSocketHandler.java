@@ -14,6 +14,7 @@ import pers.jc.network.SocketEvent;
 public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 	private Channel channel;
     private JCEntity tempEntity;
+	public long heartBeatTimeRecord;
     
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
@@ -38,32 +39,26 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
     	if (data.getType() == JCData.TYPE_EVENT) {
 			Dispatcher.handleSocketEvent(this, data);
 		} else if (data.getType() == JCData.TYPE_FUNCTION) {
-			tempEntity.director.requestHandler.offerRequest(tempEntity, data);
+			Dispatcher.handleSocketFunction(tempEntity, data);
 		} else if (data.getType() == JCData.TYPE_METHOD) {
-			boolean isAsync = Dispatcher.checkAndAsyncDoneSocketMethod(tempEntity, data);
-			if (!isAsync) {
-				tempEntity.director.requestHandler.offerRequest(tempEntity, data);
-			}
+			Dispatcher.handleSocketMethod(tempEntity, data);
 		}
 	}
 
 	@SocketEvent
     public void loadTempEntity() throws Exception {
     	tempEntity = JCEngine.entityClass.newInstance();
-		tempEntity.director = JCEngine.director;
 		tempEntity.channel = new JCChannel(channel);
 		tempEntity.isValid = true;
 		tempEntity.authed = JCEngine.defaultAuthValue;
-		tempEntity.director.callbackHandler.offerCallback(() -> {
-			call("loadTempEntity", tempEntity.id);
-			tempEntity.onLoad();
-		});
-		addToHeartBeatHandler();
+		call("loadTempEntity", tempEntity.id);
+		JCEngine.gameService.execute(tempEntity::onLoad);
+		HeartBeatHandler.ins.addEntity(this);
     }
     
     private void destroyTempEntity() {
 		if (tempEntity != null) {
-			tempEntity.director.callbackHandler.offerCallback(() -> {
+			JCEngine.gameService.execute(() -> {
 				tempEntity.isValid = false;
 				tempEntity.onDestroy();
 			});
@@ -74,11 +69,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
 	public void doHeartBeat() {
 		heartBeatTimeRecord = System.currentTimeMillis();
 	}
-	public long heartBeatTimeRecord;
-	private void addToHeartBeatHandler() {
-		heartBeatTimeRecord = System.currentTimeMillis();
-		HeartBeatHandler.ins.addEntity(this);
-	}
+
 	public void die() {
 		channel.close();
 	}
