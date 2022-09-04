@@ -92,6 +92,7 @@ public class JCCache {
     }
 
     private void autoClear() {
+        long interval = 10 * 1000;
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -107,7 +108,7 @@ public class JCCache {
                 }
                 cacheMapLock.writeLock().unlock();
             }
-        }, 0, 10 * 1000);
+        }, interval, interval);
     }
 
     private static class CacheMapValue {

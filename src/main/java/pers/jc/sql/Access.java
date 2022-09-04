@@ -63,7 +63,7 @@ class Access {
 				closeConnection(pool.poll());
 				keepMinIdle();
 			}
-		}, 0, clearInterval);
+		}, clearInterval, clearInterval);
 	}
 
 	private void keepMinIdle() {

@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class JCFileTool {
 
-    public void copyDir(String oldPath, String newPath) throws Exception {
+    public static void copyDir(String oldPath, String newPath) throws Exception {
         File newDir = new File(newPath);
         if (!newDir.exists()) {
             if (!newDir.mkdirs()) {
@@ -27,7 +27,7 @@ public class JCFileTool {
         }
     }
 
-    public void copyFile(String oldPath, String newPath) throws Exception {
+    public static void copyFile(String oldPath, String newPath) throws Exception {
         FileInputStream fileInputStream;
         FileOutputStream fileOutputStream;
         FileChannel channelIn;
@@ -43,7 +43,7 @@ public class JCFileTool {
         fileOutputStream.close();
     }
 
-    public String[] readLines(File file) throws Exception {
+    public static String[] readLines(File file) throws Exception {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
         ArrayList<String> lines = new ArrayList<>();
         String line;
@@ -54,7 +54,7 @@ public class JCFileTool {
         return lines.toArray(new String[0]);
     }
 
-    public String readStr(File file) throws Exception {
+    public static String readStr(File file) throws Exception {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
         StringBuilder stringBuilder = new StringBuilder();
         String line;
@@ -68,7 +68,7 @@ public class JCFileTool {
         return stringBuilder.toString();
     }
 
-    public void writeStr(File file, String content) throws Exception {
+    public static void writeStr(File file, String content) throws Exception {
         // 获取该文件的缓冲输出流
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));
         // 写入信息
