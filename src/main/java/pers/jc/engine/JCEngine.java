@@ -94,6 +94,4 @@ public class JCEngine {
 		for (Object key : keys) autoIncrementIDs.remove(key);
 		autoIncrementIDsLock.unlock();
 	}
-
-	public static void main(String[] args) {}
 }
