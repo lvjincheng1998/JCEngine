@@ -3,19 +3,19 @@ package pers.jc.util;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class JCCache {
-    private final HashMap<String, CacheMapValue> cacheMap = new HashMap<>();
+public class JCCacheMap {
+    private final Map<String, CacheMapValue> cacheMap = new HashMap<>();
     private final ReentrantReadWriteLock cacheMapLock = new ReentrantReadWriteLock();
 
     private static final class SingletonHolder {
-        private static final JCCache INSTANCE = new JCCache();
+        private static final JCCacheMap INSTANCE = new JCCacheMap();
     }
 
-    public static JCCache ins() {
+    public static JCCacheMap ins() {
         return SingletonHolder.INSTANCE;
     }
 
-    private JCCache() {
+    private JCCacheMap() {
         autoClear();
     }
 
@@ -87,6 +87,16 @@ public class JCCache {
         return value;
     }
 
+    public int size() {
+        cacheMapLock.readLock().lock();
+        int size = 0;
+        for (CacheMapValue value : cacheMap.values()) {
+            if (isValid(value)) size++;
+        }
+        cacheMapLock.readLock().unlock();
+        return size;
+    }
+
     private boolean isValid(CacheMapValue cacheMapValue) {
         return cacheMapValue != null && (cacheMapValue.timeout == -1 || System.currentTimeMillis() < cacheMapValue.timeout);
     }
@@ -97,14 +107,13 @@ public class JCCache {
             @Override
             public void run() {
                 cacheMapLock.writeLock().lock();
-                ArrayList<String> timeoutKeys = new ArrayList<>();
-                for (Map.Entry<String, CacheMapValue> entry : cacheMap.entrySet()) {
+                Iterator<Map.Entry<String, CacheMapValue>> iterator = cacheMap.entrySet().iterator();
+                Map.Entry<String, CacheMapValue> entry;
+                while (iterator.hasNext()) {
+                    entry = iterator.next();
                     if (!isValid(entry.getValue())) {
-                        timeoutKeys.add(entry.getKey());
+                        iterator.remove();
                     }
-                }
-                for (String timeoutKey : timeoutKeys) {
-                    cacheMap.remove(timeoutKey);
                 }
                 cacheMapLock.writeLock().unlock();
             }

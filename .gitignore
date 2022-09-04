@@ -1,6 +1,5 @@
 .idea/
 /out/
 /src/META-INF/
-/src/test/
 /target/
 *.iml 
