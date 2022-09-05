@@ -196,7 +196,7 @@ public class Dispatcher {
             content += String.join(", ", parameterNames);
             content += ")";
             if (stringBuilder.length() > 0) {
-                content += "\n";
+                stringBuilder.append("\n");
             }
             stringBuilder.append(content);
         }
