@@ -55,15 +55,13 @@ class Access {
 			e.printStackTrace();
 		}
 		
-		keepMinIdle();
-
 		new Timer().schedule(new TimerTask() {
 			@Override
 			public void run() {
 				closeConnection(pool.poll());
 				keepMinIdle();
 			}
-		}, clearInterval, clearInterval);
+		}, 0, clearInterval);
 	}
 
 	private void keepMinIdle() {
