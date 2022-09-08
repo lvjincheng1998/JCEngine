@@ -9,6 +9,10 @@ export class JCEngine {
     public static reboot(entity: JCEntity) {
         new JCEngineCore.WebSocketServer(this.url, entity);
     }
+
+    public static bootNew(url: string, entity: JCEntity) {
+        new JCEngineCore.WebSocketServer(url, entity);
+    }
 }
 
 export class JCEntity {

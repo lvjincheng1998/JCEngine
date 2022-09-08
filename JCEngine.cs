@@ -17,6 +17,9 @@ namespace JCEngineCore {
         public static void reboot(JCEntity entity) {
             new JCEngineCore.WebSocketServer(url, entity);
         }
+        public static void bootNew(string url, JCEntity entity) {
+            new JCEngineCore.WebSocketServer(url, entity);
+        }
     }
     public class JCEntity {
         public int id;
