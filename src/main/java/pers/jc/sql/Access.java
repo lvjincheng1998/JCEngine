@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 class Access {
@@ -13,7 +14,9 @@ class Access {
 	private final String password;
 	private final int minIdle;
 	private final int maxActive;
+	private final int maxAlive;
 	protected ConcurrentLinkedQueue<Connection> pool = new ConcurrentLinkedQueue<>();
+	protected ConcurrentHashMap<Connection, Long> connCreateTimeMap = new ConcurrentHashMap<>();
 	private volatile int activeCount = 0;
 	
 	protected Access(Map<String, Object> config) {
@@ -42,6 +45,9 @@ class Access {
 		
 		tempValue = config.get("maxActive");
 		maxActive = (tempValue == null) ? 20 : (int) tempValue;
+
+		tempValue = config.get("maxAlive");
+		maxAlive = (tempValue == null) ? 10 * 60 * 1000 : (int) tempValue;
 		
 		tempValue = config.get("clearInterval");
 		long clearInterval = (tempValue == null) ? 3000 : (long) tempValue;
@@ -58,7 +64,7 @@ class Access {
 		new Timer().schedule(new TimerTask() {
 			@Override
 			public void run() {
-				closeConnection(pool.poll());
+				addToPool(pool.poll());
 				keepMinIdle();
 			}
 		}, 0, clearInterval);
@@ -67,11 +73,8 @@ class Access {
 	private void keepMinIdle() {
 		while (pool.size() < minIdle && activeCount < maxActive) {
 			Connection connection = createConnection();
-			if (connection != null) {
-				addToPool(connection);
-			} else {
-				break;
-			}
+			if (connection == null) break;
+			addToPool(connection);
 		}
 	}
 	
@@ -94,15 +97,19 @@ class Access {
 	}
 	
 	private Connection createConnection() {
+		Connection connection = null;
 		if(addActiveCount()){
 			try {
-				return DriverManager.getConnection(url, username, password);
+				connection = DriverManager.getConnection(url, username, password);
 			} catch (Exception e) {
 				subActiveCount();
 				e.printStackTrace();
 			}
+			if (connection != null) {
+				connCreateTimeMap.put(connection, System.currentTimeMillis());
+			}
 		}
-		return null;
+		return connection;
 	}
 	
 	protected void closeConnection(Connection connection) {
@@ -113,6 +120,7 @@ class Access {
 				e.printStackTrace();
 			} finally {
 				subActiveCount();
+				connCreateTimeMap.remove(connection);
 			}
 		}
 	}
@@ -132,11 +140,15 @@ class Access {
 	}
 	
 	protected void addToPool(Connection connection) {
+		if (connection == null) return;
 		if (minIdle > 0) {
-			pool.add(connection);
-		} else {
-			closeConnection(connection);
+			Long createTime = connCreateTimeMap.get(connection);
+			if (createTime != null && System.currentTimeMillis() - createTime < maxAlive) {
+				pool.add(connection);
+				return;
+			}
 		}
+		closeConnection(connection);
 	}
 }
 
