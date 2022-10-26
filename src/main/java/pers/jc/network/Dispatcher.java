@@ -91,7 +91,7 @@ public class Dispatcher {
             try {
                 targetMethod.invoke(entity, args);
             } catch (Exception e) {
-                JCLogger.error(e.getMessage());
+                JCLogger.errorStackTrace(e.getMessage());
             }
         });
     }
@@ -110,6 +110,8 @@ public class Dispatcher {
             Parameter parameter = parameters[i];
             if (JCEntity.class.isAssignableFrom(parameter.getType())) {
                 castArgs[i] = requester;
+            } else if (SocketRequest.class.isAssignableFrom(parameter.getType())) {
+                castArgs[i] = new SocketRequest(data);
             } else if (SocketResponse.class.isAssignableFrom(parameter.getType())) {
                 castArgs[i] = new SocketResponse(requester, data);
             } else {
@@ -127,20 +129,10 @@ public class Dispatcher {
                 JCLogger.error("SocketMethod<" + data.getFunc() + "> Invoke Need Entity Authed");
                 return;
             }
-            if (socketMethod.async()) {
-                JCEngine.asyncService.execute(() -> {
-                    try {
-                        socketTarget.getMethod().invoke(socketTarget.getInstance(), castArgs);
-                    } catch (Exception e) {
-                        JCLogger.error(e.getMessage());
-                    }
-                });
-                return;
-            }
             try {
                 socketTarget.getMethod().invoke(socketTarget.getInstance(), castArgs);
             } catch (Exception e) {
-                JCLogger.error(e.getMessage());
+                JCLogger.errorStackTrace(e.getMessage());
             }
         });
     }

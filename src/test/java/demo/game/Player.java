@@ -26,6 +26,7 @@ public class Player extends JCEntity {
 
     @SocketFunction
     public void hello(int a, long b, float c, double d, boolean e, String f) {
-        JCLogger.info("hello函数被客户端调用", "线程ID:" + Thread.currentThread().getId(), a, b, c, d, e, f);
+        JCLogger.info("hello函数被客户端调用", "线程ID:" + Thread.currentThread().getId(), "id =", id,
+                "\n收到的参数:", a, b, c, d, e, f);
     }
 }

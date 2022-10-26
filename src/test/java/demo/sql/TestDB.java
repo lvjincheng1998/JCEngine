@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class TestDB {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         /**
          * 在测试前需要先把数据库准备好
          * 1. 先用/src/test/resources/sql/create_db.sql导入数据库

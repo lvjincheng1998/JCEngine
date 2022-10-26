@@ -19,12 +19,9 @@ export default class MainView extends cc.Component {
             });
         });
         this.setOnClick(panel_left, 2, "testComp.test2", () => {
-            Player.ins.call("testComp.test2", [], (a, b) => {
+            Player.ins.call("testComp.test2", ["aihei", 111, {a: 1, b: "bb"}, [1, 2, 3]], (a, b) => {
                 console.log("testComp.test2-callback", a, b);
             });
-        });
-        this.setOnClick(panel_left, 3, "testComp.test3", () => {
-            Player.ins.call("testComp.test3");
         });
     }
     
