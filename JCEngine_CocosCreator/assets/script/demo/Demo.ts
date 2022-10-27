@@ -20,7 +20,6 @@ export default class Demo extends cc.Component {
             return Player.ins.call(funcName, ["aihei", 111, {a: 1, b: "bb"}, [1, 2, 3]], (a, b) => {
                 console.warn(`收到${funcName}回调`, a, b);
             });
-            
         });
         this.setOnClick(this.panel_left, 2, "testComp.test2", (funcName) => {
             return Player.ins.call(funcName, ["aihei", 111, {a: 1, b: "bb"}, [1, 2, 3]], (a, b) => {
