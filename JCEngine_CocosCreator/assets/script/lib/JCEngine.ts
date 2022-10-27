@@ -1,57 +1,53 @@
-export class JCEngine {
-    public static url: string;
+export module JCEngineCore {
 
-    public static boot(url: string, entity: JCEntity) {
-        this.url = url;
-        new JCEngineCore.WebSocketServer(url, entity);
-    }
-
-    public static reboot(entity: JCEntity) {
-        new JCEngineCore.WebSocketServer(this.url, entity);
-    }
-
-    public static bootNew(url: string, entity: JCEntity) {
-        new JCEngineCore.WebSocketServer(url, entity);
-    }
-}
-
-export class JCEntity {
-    public id: number;
-    public channel: JCEngineCore.Channel;
-    public isValid: boolean;
-    public loaded: boolean;
-    public components: Map<string, any> = new Map<string, any>();
-
-    public onLoad() {}
-
-    public onReload() {}
-
-    public onDestroy() {}
-
-    public onMiss() {}
-
-    public call(func: string, args?: any[], callback?: Function): boolean {
-        if (this.isValid) {
-            let uuid = "";
-            let type = JCEngineCore.DataType.FUNCTION;
-            if (func.indexOf(".") > -1) {
-                type = JCEngineCore.DataType.METHOD;
-                uuid = JCEngineCore.CallbackHandler.addCallback(callback);
-            }
-            if (args == undefined) {
-                args = [];
-            }
-            let data = {uuid: uuid, type: type, func: func, args: args};
-            this.channel.writeAndFlush(JSON.stringify(data));
-            return true;
+    export class JCEngine {
+        public static entityUrls: Map<JCEntity, string> = new Map();
+    
+        public static boot(url: string, entity: JCEntity) {
+            this.entityUrls.set(entity, url);
+            new WebSocketServer(url, entity);
         }
-        return false;
+    
+        public static reboot(entity: JCEntity) {
+            new WebSocketServer(this.entityUrls.get(entity), entity);
+        }
     }
-}
 
-module JCEngineCore {
+    export class JCEntity {
+        public id: number;
+        public channel: Channel;
+        public isValid: boolean;
+        public loaded: boolean;
+        public components: Map<string, any> = new Map();
+    
+        public onLoad() {}
+    
+        public onReload() {}
+    
+        public onDestroy() {}
+    
+        public onMiss() {}
+    
+        public call(func: string, args?: any[], callback?: Function): boolean {
+            if (this.isValid) {
+                let uuid = "";
+                let type = DataType.FUNCTION;
+                if (func.indexOf(".") > -1) {
+                    type = DataType.METHOD;
+                    uuid = CallbackHandler.addCallback(callback);
+                }
+                if (args == undefined) {
+                    args = [];
+                }
+                let data = {uuid: uuid, type: type, func: func, args: args};
+                this.channel.writeAndFlush(JSON.stringify(data));
+                return true;
+            }
+            return false;
+        }
+    }
 
-    export class Channel {
+    class Channel {
         private webSocket: WebSocket;
 
         constructor(webSocket: WebSocket) {
@@ -66,8 +62,8 @@ module JCEngineCore {
             this.webSocket.close();
         }
     }
-
-    export class WebSocketServer {
+    
+    class WebSocketServer {
         private webSocket: WebSocket;
         private tempEntity: JCEntity;
         private heartBeatTimerID: number | undefined;
@@ -127,7 +123,7 @@ module JCEngineCore {
     
         public loadTempEntity(id: number) {
             this.tempEntity.id = id;
-            this.tempEntity.channel = new JCEngineCore.Channel(this.webSocket);
+            this.tempEntity.channel = new Channel(this.webSocket);
             this.tempEntity.isValid = true;
             try {
                 this.tempEntity.loaded ? this.tempEntity.onReload() : this.tempEntity.onLoad();
@@ -154,7 +150,7 @@ module JCEngineCore {
         }
     }
 
-    export class CallbackHandler {
+    class CallbackHandler {
         private static nextID: number = 0;
         private static mapper: Map<string, CallbackInfo> = new Map();
     
@@ -193,19 +189,19 @@ module JCEngineCore {
         }
     } 
 
-    export interface CallbackInfo {
+    interface CallbackInfo {
         callback: Function;
         deadTime: number;
     }
-    
-    export interface Data {
+
+    interface Data {
         uuid: string;
         type: number;
         func: string;
         args: any[];
     }
-    
-    export enum DataType {
+
+    enum DataType {
         EVENT,
         FUNCTION,
         METHOD

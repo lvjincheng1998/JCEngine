@@ -232,7 +232,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "MainView",
+    "_name": "Demo",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -301,7 +301,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Panel-Left",
+    "_name": "Panel Left",
     "_objFlags": 0,
     "_parent": {
       "__id__": 5
@@ -370,8 +370,8 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Btn",
-    "_objFlags": 0,
+    "_name": "Button",
+    "_objFlags": 512,
     "_parent": {
       "__id__": 6
     },
@@ -398,7 +398,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 200,
-      "height": 40
+      "height": 30
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -410,7 +410,7 @@
       "ctor": "Float64Array",
       "array": [
         0,
-        300,
+        305,
         0,
         0,
         0,
@@ -467,7 +467,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 200,
-      "height": 40
+      "height": 30
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -529,7 +529,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 200,
-      "height": 40
+      "height": 30
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -583,7 +583,7 @@
     "_string": "text",
     "_N$string": "text",
     "_fontSize": 20,
-    "_lineHeight": 40,
+    "_lineHeight": 30,
     "_enableWrapText": false,
     "_N$file": null,
     "_isSystemFontUsed": true,
@@ -833,6 +833,9 @@
       "__id__": 5
     },
     "_enabled": true,
+    "panel_left": {
+      "__id__": 6
+    },
     "_id": "5ecykvzwlP0atecR4vWklt"
   },
   {

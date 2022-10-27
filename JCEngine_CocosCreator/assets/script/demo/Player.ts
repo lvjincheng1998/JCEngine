@@ -1,6 +1,6 @@
-import { JCEngine, JCEntity } from "../lib/JCEngine";
+import { JCEngineCore } from "../lib/JCEngine";
 
-export default class Player extends JCEntity {
+export default class Player extends JCEngineCore.JCEntity {
     public static ins;
 
     public onLoad(): void {
@@ -11,7 +11,7 @@ export default class Player extends JCEntity {
     public onDestroy(): void {
         console.log("onDestroy", "与服务端断开连接");
         console.log("reboot", "发起重连");
-        JCEngine.reboot(this);
+        JCEngineCore.JCEngine.reboot(this);
     }
 
     public onReload(): void {
@@ -21,6 +21,6 @@ export default class Player extends JCEntity {
     public onMiss(): void {
         console.log("onMiss", "与服务端无法建立连接，请检查网络或服务器");
         console.log("reboot", "发起重连");
-        JCEngine.reboot(this);
+        JCEngineCore.JCEngine.reboot(this);
     }
 }
