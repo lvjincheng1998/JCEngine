@@ -15,6 +15,11 @@ public class Player extends JCEntity {
         JCLogger.info("玩家登录", "线程ID:" + Thread.currentThread().getId(), "id =", id);
         playerMap.put(id, this);
         JCLogger.info("在线玩家数量 =", playerMap.size());
+
+        //调用客户端的方法(args可传多个参数)
+        call("showMessage1", "msg from server");
+        call("showMessage2", "msg from server", 12345);
+        call("TestComp.doSomeThing", "test do some thing");
     }
 
     @Override
