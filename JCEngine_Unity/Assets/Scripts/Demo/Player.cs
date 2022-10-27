@@ -9,6 +9,9 @@ public class Player : JCEngineCore.JCEntity
     public override void onLoad() {
         Player.ins = this;
         Debug.Log("onLoad 与服务端建立连接");
+
+        //注册自定义组件，里面的函数可被服务端调用
+        this.components.Add("TestComp", TestComp.ins);
     }
  
     public override void onDestroy() {
@@ -31,5 +34,15 @@ public class Player : JCEngineCore.JCEntity
     IEnumerator ReconnenctServer() {
         yield return new WaitForSecondsRealtime(0.1f);
         JCEngineCore.JCEngine.reboot(this);
+    }
+     
+    //自定义函数（可被后端调用）
+    public void showMessage1(string arg0) {
+        Debug.Log("showMessage1 " + arg0);
+    }
+ 
+    //自定义函数（可被后端调用）
+    public void showMessage2(string arg0, int arg1) {
+        Debug.Log("showMessage2 " + arg0 + " " + arg1);
     }
 }
