@@ -173,7 +173,7 @@ export module JCEngineCore {
         public static handleCallback(data: Data) {
             if (this.mapper.size > 10) {
                 let now = Date.now();
-                for (let item of (this.mapper as any)) {
+                for (let item of Array.from(this.mapper)) {
                     let key = item[0];
                     let value = item[1];
                     if (now >= value.deadTime) {
