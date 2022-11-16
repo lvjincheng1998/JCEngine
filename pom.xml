@@ -77,5 +77,10 @@
             <version>1.7.5</version>
         </dependency>
         <!--Redis依赖-结束-->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.12.11</version>
+        </dependency>
     </dependencies>
 </project>
