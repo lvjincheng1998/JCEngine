@@ -47,7 +47,7 @@ class Access {
 		maxActive = (tempValue == null) ? 20 : (int) tempValue;
 
 		tempValue = config.get("maxAlive");
-		maxAlive = (tempValue == null) ? 10 * 60 * 1000 : (int) tempValue;
+		maxAlive = (tempValue == null) ? 60 * 60 * 1000 : (int) tempValue;
 		
 		tempValue = config.get("clearInterval");
 		long clearInterval = (tempValue == null) ? 3000 : (long) tempValue;
