@@ -147,8 +147,6 @@ public class CURD {
 	}
 
 	public int getRowCount(String tableName, SQL sql) {
-		sql.SELECT("COUNT(*) AS res");
-		sql.FROM(tableName);
-		return Handle.getRowCount(access, sql.toString());
+		return select(sql.SELECT("COUNT(*) AS res").FROM(tableName)).get(0).getInteger("res");
 	}
 }
