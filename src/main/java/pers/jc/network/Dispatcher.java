@@ -129,10 +129,20 @@ public class Dispatcher {
                 JCLogger.error("SocketMethod<" + data.getFunc() + "> Invoke Need Entity Authed");
                 return;
             }
-            try {
-                socketTarget.getMethod().invoke(socketTarget.getInstance(), castArgs);
-            } catch (Exception e) {
-                JCLogger.errorStackTrace(e.getMessage());
+            if (socketMethod.async()) {
+                JCEngine.asyncService.execute(() -> {
+                    try {
+                        socketTarget.getMethod().invoke(socketTarget.getInstance(), castArgs);
+                    } catch (Exception e) {
+                        JCLogger.errorStackTrace(e.getMessage());
+                    }
+                });
+            } else {
+                try {
+                    socketTarget.getMethod().invoke(socketTarget.getInstance(), castArgs);
+                } catch (Exception e) {
+                    JCLogger.errorStackTrace(e.getMessage());
+                }
             }
         });
     }

@@ -8,4 +8,5 @@ import java.lang.annotation.*;
 public @interface SocketMethod {
     /**是否需要认证后才能调用 */
     boolean auth() default true;
+    boolean async() default false;
 }
