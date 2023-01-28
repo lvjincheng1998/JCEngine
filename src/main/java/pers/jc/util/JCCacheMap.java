@@ -7,16 +7,8 @@ public class JCCacheMap {
     private final Map<String, CacheMapValue> cacheMap = new HashMap<>();
     private final ReentrantReadWriteLock cacheMapLock = new ReentrantReadWriteLock();
 
-    private static final class SingletonHolder {
-        private static final JCCacheMap INSTANCE = new JCCacheMap();
-    }
-
-    public static JCCacheMap ins() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    private JCCacheMap() {
-        autoClear();
+    public JCCacheMap() {
+        autoClear(this);
     }
 
     public void put(String key, Object value) {
@@ -101,23 +93,34 @@ public class JCCacheMap {
         return cacheMapValue != null && (cacheMapValue.timeout == -1 || System.currentTimeMillis() < cacheMapValue.timeout);
     }
 
-    private void autoClear() {
-        long interval = 10 * 1000;
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                cacheMapLock.writeLock().lock();
-                Iterator<Map.Entry<String, CacheMapValue>> iterator = cacheMap.entrySet().iterator();
-                Map.Entry<String, CacheMapValue> entry;
-                while (iterator.hasNext()) {
-                    entry = iterator.next();
-                    if (!isValid(entry.getValue())) {
-                        iterator.remove();
-                    }
+    private static List<JCCacheMap> autoClearMapList = new LinkedList<>();
+    private static boolean autoClearStarted = false;
+    private static final long autoClearInterval = 10 * 1000;
+
+    private static synchronized void autoClear(JCCacheMap map) {
+        autoClearMapList.add(map);
+        if (!autoClearStarted) {
+            autoClearStarted = true;
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    autoClearHandle();
                 }
-                cacheMapLock.writeLock().unlock();
+            }, autoClearInterval, autoClearInterval);
+        }
+    }
+
+    public static synchronized void autoClearHandle() {
+        for (JCCacheMap map : autoClearMapList) {
+            map.cacheMapLock.writeLock().lock();
+            Iterator<Map.Entry<String, CacheMapValue>> iterator = map.cacheMap.entrySet().iterator();
+            Map.Entry<String, CacheMapValue> entry;
+            while (iterator.hasNext()) {
+                entry = iterator.next();
+                if (!map.isValid(entry.getValue())) iterator.remove();
             }
-        }, interval, interval);
+            map.cacheMapLock.writeLock().unlock();
+        }
     }
 
     private static class CacheMapValue {

@@ -3,10 +3,9 @@ package demo.util;
 import pers.jc.util.JCCacheMap;
 
 public class Test_JCCacheMap {
+    private static JCCacheMap cacheMap = new JCCacheMap();
 
     public static void main(String[] args) throws InterruptedException {
-        JCCacheMap cacheMap = JCCacheMap.ins();
-
         System.out.println("===加入map===");
         cacheMap.put("a", 1);
         cacheMap.put("b", 2, System.currentTimeMillis() + 100);
