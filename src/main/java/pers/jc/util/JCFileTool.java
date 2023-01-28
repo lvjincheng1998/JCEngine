@@ -7,6 +7,20 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class JCFileTool {
+    private static String rootPath;
+
+    public static String getRootPath() {
+        if (rootPath == null) {
+            try {
+                rootPath = new File("").getCanonicalPath();
+            } catch (Exception e) { e.printStackTrace(); }
+        }
+        return rootPath;
+    }
+
+    public static String joinPath(String... paths) {
+        return String.join(File.separator, paths);
+    }
 
     public static void copyDir(String oldPath, String newPath) throws Exception {
         File newDir = new File(newPath);
