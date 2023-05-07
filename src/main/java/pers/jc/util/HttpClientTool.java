@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class HttpClientUtils {
+public class HttpClientTool {
 
     public static String get(String url, Map<String, String> paramMap) {
         return request(url, paramMap, HttpGet.class);
