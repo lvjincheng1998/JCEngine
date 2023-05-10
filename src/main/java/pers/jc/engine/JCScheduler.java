@@ -9,11 +9,12 @@ import java.util.*;
 public class JCScheduler {
     private final Queue<ScheduleTask> taskQueue = new PriorityQueue<>((a, b) -> (int) (a.nextRunTime - b.nextRunTime));
 
-    private long currentTime;
-    private long nextHandleTime;
-
     private final Object serviceWaiter = new Object();
     private final Object handleWaiter = new Object();
+
+    private long currentTime;
+    private long nextHandleTime;
+    private long needWaitTime;
 
     private static class ScheduleTask {
         Runnable runnable;
@@ -27,6 +28,15 @@ public class JCScheduler {
         void updateNextRunTime() {
             nextRunTime += executeCount == 0 ? delay : interval;
         }
+
+        void execute() {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            executeCount++;
+        }
     }
 
     protected JCScheduler() {
@@ -38,9 +48,11 @@ public class JCScheduler {
                         serviceWaiter.wait();
                     }
                     synchronized (handleWaiter) {
-                        currentTime = System.currentTimeMillis();
+                        ScheduleTask headTask = taskQueue.peek();
+                        nextHandleTime = headTask == null ? -1 : headTask.nextRunTime;
                         if (nextHandleTime > 0) {
-                            long needWaitTime = nextHandleTime - currentTime;
+                            currentTime = System.currentTimeMillis();
+                            needWaitTime = nextHandleTime - currentTime;
                             if (needWaitTime > 0) {
                                 handleWaiter.wait(needWaitTime);
                             }
@@ -66,7 +78,7 @@ public class JCScheduler {
                 if (task == null) break;
                 currentTime = System.currentTimeMillis();
                 if (currentTime < task.nextRunTime) break;
-                task.runnable.run();
+                task.execute();
                 task.updateNextRunTime();
                 if (task.repeat >= 0 && task.executeCount > task.repeat) {
                     task.isValid = false;
@@ -74,14 +86,6 @@ public class JCScheduler {
                 if (taskQueue.remove(task) && task.isValid) {
                     taskQueue.add(task);
                 }
-            }
-        }
-        synchronized (handleWaiter) {
-            ScheduleTask headTask = taskQueue.peek();
-            if (headTask != null) {
-                nextHandleTime = headTask.nextRunTime;
-            } else {
-                nextHandleTime = -1;
             }
         }
         synchronized (serviceWaiter) {
